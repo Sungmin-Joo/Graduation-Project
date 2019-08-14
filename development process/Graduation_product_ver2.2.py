@@ -1,1865 +1,979 @@
 # -*- coding: utf-8 -*-
-
 import tkinter 
-
 import time
-
 import Smart_File
-
 import wifi
-
 import voice
-
 import os
 
- 
-
 class Finder:
-
     def __init__(self, *args, **kwargs):
-
         self.server_name = kwargs['server_name']
-
         self.password = kwargs['password']
-
         self.interface_name = kwargs['interface']
-
         self.main_dict = {}
 
- 
-
     def run(self):
-
         command = """sudo iwlist wlp2s0 scan | grep -ioE 'ssid:"(.*{}.*)'"""
-
         result = os.popen(command.format(self.server_name))
-
         result = list(result)
 
- 
-
         if "Device or resource busy" in result:
-
             print("buzy")
-
             return None
-
         else:
-
             ssid_list = [item.lstrip('SSID:').strip('"\n') for item in result]
-
             print("Successfully get ssids {}".format(str(ssid_list)))
 
- 
-
         for name in ssid_list:
-
             try:
-
                 result = self.connection(name)
-
             except Exception as exp:
-
                 print("Couldn't connect to name : {}. {}".format(name, exp))
-
             else:
-
                 if result:
-
                     print("Successfully connected to {}".format(name))
 
- 
-
     def connection(self, name):
-
         try:
-
             os.system("nmcli d wifi connect {} password {} iface {}".format(name,
-
        self.password,
-
        self.interface_name))
-
         except:
-
             raise
-
         else:
-
             return True
 
- 
-
 window=tkinter.Tk()
-
 voice_flags = dict()
-
 toggle_flag = dict()
-
 word_double_flag = 0
-
 Shift_flag = 0
-
 line = 1
-
 double_key_flag = 0
-
 long_click_flag = 0
-
 little_array = ['`','1','2','3','4','5','6','7','8','9','0','-','=',
-
                 'q','w','e','r','t','y','u','i','o','p','[' ,']',
-
                 'a','s','d','f','g','h','j','k','l',';',
-
                 'z','x','c','v','b','n','m',',','.','/','Space','Shift','Erase']
-
 big_array = ['~','!','@','#','$','%','^','&','*','(',')','_','+',
-
              'Q','W','E','R','T','Y','U','I','O','P','{','}',
-
              'A','S','D','F','G','H','J','K','L',':',
-
              'Z','X','C','V','B','N','M','<','>','?','Space','Shift','Erase']
 
- 
-
 word_list = Smart_File.Find_dir_format("./dot_data/",".txt")
-
 word_len = len(word_list)
-
 def Mapping(i):
-
     #global double_key_flag
-
     #if(double_key_flag):  
-
     global text_pw, Shift_flag
-
     if(i == 46):
-
         if(Shift_flag == 0):
-
             Shift_flag = 1
-
         else:
-
             Shift_flag = 0
-
     elif(i == 47):
-
         text_pw.delete(len(text_pw.get())-1,tkinter.END)
-
         Shift_flag = 0
-
     elif(i == 45):
-
         text_pw.insert(tkinter.END," ")
-
         Shift_flag = 0
-
     else:
-
         if(Shift_flag == 0):
-
             text_pw.insert(tkinter.END,little_array[i])
-
         if(Shift_flag == 1):
-
             text_pw.insert(tkinter.END,big_array[i])
-
             Shift_flag = 0
-
     
-
     '''
-
     else:
-
         if(i == 46):
-
             if(Shift_flag == 0):
-
                 os.system("mpg321 ./sound/shift.mp3")
-
             else:
-
                 os.system("mpg321 ./sound/shift_cancel.mp3")
-
         elif(i == 47):
-
             os.system("mpg321 ./sound/erase.mp3")
-
         elif(i == 45):
-
             os.system("mpg321 ./sound/space.mp3")
-
         else:
-
             if(Shift_flag == 0):
-
                 os.system("mpg321 ./sound/"+little_array[i]+".mp3")
-
                 pass
-
             if(Shift_flag == 1):
-
                 os.system("mpg321 ./sound/"+big_array[i]+".mp3")
-
                 pass
-
         double_key_flag = 0
-
-        print("Å°°ª¿¡ ÇØ´çÇÏ´Â À½¼ºÃâ·Â")
-
+        print("í‚¤ê°’ì— í•´ë‹¹í•˜ëŠ” ìŒì„±ì¶œë ¥")
     '''
 
- 
-
- 
 
 def keyboard_double(event):
-
     global double_key_flag
-
     double_key_flag = 1
-
     
-
 def Make_button(Frame):
-
     temp_row = 0
-
     temp_col = 0
-
     for i in range(0,48):
-
         key_func = lambda x = i : Mapping(x)
-
         #Use lambda to mapping each button
-
         if(little_array[i] == 'q' or little_array[i] == 'a' or little_array[i] == 'z'):
-
             temp_row +=1
-
             if(temp_row >= 2):
-
                 temp_col = 1
-
             else:
-
                 temp_col = 0
-
         if(little_array[i] == 'Space'):
-
             temp = tkinter.Button(Frame,text = 'Space', overrelief="solid",command = key_func,
-
                                   bg = 'burlywood1', width=3,repeatdelay=400, repeatinterval=80)
-
             temp.grid(row=2,column = 11)
-
         elif(little_array[i] == 'Shift'):
-
             temp = tkinter.Button(Frame,text = 'Shift', overrelief="solid",command = key_func,
-
                                   bg = 'burlywood1', width=3,repeatdelay=400, repeatinterval=80)
-
             temp.grid(row=3,column = 11)
-
         elif(little_array[i] == 'Erase'):
-
             temp = tkinter.Button(Frame,text = 'Erase', overrelief="solid",command = key_func,
-
                                   bg = 'burlywood1',width=3,repeatdelay=400, repeatinterval=80)
-
             temp.grid(row=1,column = 12)
-
         else:
-
             temp = tkinter.Button(Frame,text = little_array[i] + '( '+ big_array[i] +' )',
-
                                   bg = 'burlywood1', overrelief="solid",command = key_func, width=3,repeatdelay=400, repeatinterval=80)
-
             temp.grid(row=temp_row,column = temp_col)
-
             temp_col += 1
-
         temp.bind("<Double-Button-1>", keyboard_double)
-
         
-
 def voice_timmer(key, sound, minute):
-
     global voice_voice_flags
-
     if(voice_flags.get(key,0) == 0):
-
         voice_flags[key] = time.time() 
-
         os.system("mpg321 ./sound/"+sound+".mp3")
-
     else:
-
         if(time.time() - voice_flags.get(key,0) > minute):
-
             voice_flags[key] = time.time() 
-
             os.system("mpg321 ./sound/"+sound+".mp3") 
-
     
-
 def Connect_wifi(event):
-
     global long_click_flag
-
     long_click_flag = time.time()
-
-    print("¿ÍÀÌÆÄÀÌ¿¬°á À½¼º Ãâ·Â")
-
+    print("ì™€ì´íŒŒì´ì—°ê²° ìŒì„± ì¶œë ¥")
     voice_timmer("Wifi","wifi_toplevel",5)
-
             
-
 def Connect_wifi_double():
-
     global line, text_pw, long_click_flag, text_ssid
-
     if(time.time() - long_click_flag < 2):
-
         return
-
     Wifi_list = []
-
-    voice_timmer("Move","ÀÌµ¿¿Ï·á",1) 
-
-    print("ÀÌµ¿ À½¼º Ãâ·Â")
-
+    voice_timmer("Move","ì´ë™ì™„ë£Œ",1) 
+    print("ì´ë™ ìŒì„± ì¶œë ¥")
     long_click_flag = time.time()
-
-    wi = tkinter.Toplevel(bg = 'tan')
-
+    wi = tkinter.Toplevel(bg = 'tan', cursor='none')
     wi.attributes("-fullscreen", True)
 
- 
-
     def scroll_voice():
-
-        voice_timmer("Scroll","½ºÅ©·Ñ",5)
-
+        voice_timmer("Scroll","ìŠ¤í¬ë¡¤",5)
     
-
     def Close(event=None):
-
         global long_click_flag
-
         long_click_flag = time.time()
-
         voice_timmer("Close","back",3)
 
- 
-
     def Close_double(event=None):
-
         global long_click_flag
-
         if(time.time() - long_click_flag < 2):
-
             return
-
-        voice_timmer("Move","ÀÌµ¿¿Ï·á",1) 
-
+        voice_timmer("Move","ì´ë™ì™„ë£Œ",1) 
         long_click_flag = time.time()
-
         wi.destroy()
-
         Shift_flag = 0
-
     
 
- 
-
     def Connect_double():
-
         global text_pw, text_ssid
-
-        voice_timmer("Connecnt_try","Á¢¼Ó½Ãµµ",2)
-
+        voice_timmer("Connecnt_try","ì ‘ì†ì‹œë„",2)
         print(text_pw.get(), text_ssid.get())
-
         F = Finder(server_name=text_ssid.get(),
-
                    password=text_pw.get(),
-
                    interface='wlan0')
-
         F.run
-
         '''
-
         cell = wifi.Cell.all('wlan0')[0]
-
         scheme = wifi.Scheme.for_cell('wlan0', text_ssid.get(), cell, text_pw.get())
-
         scheme.save()
-
         scheme.activate()
-
         '''
-
         wi.destroy()
 
- 
-
         
-
         
-
         
-
     wi.bind("<F11>", Close_double)
-
     #------------------------------------top--------------------------------
-
     frame_top = tkinter.Frame(wi,bg = 'tan')
 
- 
-
     frame_back=tkinter.Frame(frame_top,bg = 'burlywood1')#back,id,pw input
-
-    back = tkinter.Button(frame_back,text = "µÚ·Î°¡±â", overrelief="solid", height = 1,width=8,
-
+    back = tkinter.Button(frame_back,text = "ë’¤ë¡œê°€ê¸°", overrelief="solid", height = 1,width=8,
                           repeatdelay=100,bg = 'burlywood1',
-
                           repeatinterval=100,command=Close_double)
-
     back.bind("<Button-1>", Close)
-
     back.pack()
-
- 
 
     frame_back.grid(row=0,column=0)#grid
 
- 
-
     frame_idpw=tkinter.Frame(frame_top,bg = 'tan')
-
     frame_id=tkinter.Frame(frame_idpw,bg = 'tan')
-
     label_ssid = tkinter.Label(frame_id, text="WiFi_ID : ",width = 10, anchor='e',bg = 'tan')
-
     label_ssid.pack(side ="left")
-
     text_ssid = tkinter.Entry(frame_id,width = 30)
-
     text_ssid.pack(side = "right")
-
     frame_id.pack()
-
         
-
     frame_pw=tkinter.Frame(frame_idpw,bg = 'tan')
-
     label_pw = tkinter.Label(frame_pw, text="Password : ",width = 10, anchor='e',bg = 'tan')
-
     label_pw.pack(side ="left")
-
     text_pw = tkinter.Entry(frame_pw,width = 30)
-
     text_pw.pack(side = "right")
-
     frame_pw.pack()
-
     frame_idpw.grid(row=0,column=1)#grid
 
- 
-
     frame_button = tkinter.Frame(frame_top,bg = 'tan')
-
-    button_connect = tkinter.Button(frame_button, text = "Á¢¼Ó", overrelief="solid", height = 1,width=8,
-
+    button_connect = tkinter.Button(frame_button, text = "ì ‘ì†", overrelief="solid", height = 1,width=8,
                                     bg = 'burlywood1',command=Connect_double)
-
     button_connect.pack()
-
     
-
     frame_button.grid(row=0,column=2)#grid
-
     
-
-    frame_top.pack(side = "top")
-
+    frame_top.pack(side = "top",expand=1)
     #-----------------------------------------------------------------------
-
    
-
     #----------------------------------left---------------------------------
-
     frame_left = tkinter.Frame(wi,bg = 'tan')
-
     frame_wifi = tkinter.Frame(frame_left,bg = 'tan')#wifi list
-
         
-
     def Ins_double():
-
         try:
-
             item = listbox.curselection()
-
             index = item[0]
-
             text_ssid.delete(0,30)
-
             text_ssid.insert(0,Wifi_list[index])
-
         except:
-
-            voice_timmer("Miss","¼±ÅÃ½ÇÆĞ",5)
-
+            voice_timmer("Miss","ì„ íƒì‹¤íŒ¨",5)
         
-
     def Search():
-
         wifilist = []
-
         cells = wifi.Cell.all('wlan0')
 
- 
-
         for cell in cells:
-
             cell = str(cell)
-
             temp = cell.split('=')
-
             st = temp[1]
-
             wifilist.append(st[0:-1])
-
         return wifilist
-
     
-
-    scrollbar = tkinter.Scrollbar(frame_wifi, command = scroll_voice,bg = 'tan')#º¸·ù
-
+    scrollbar = tkinter.Scrollbar(frame_wifi, command = scroll_voice,bg = 'tan')#ë³´ë¥˜
     scrollbar.pack(side="right", fill="y")
-
     listbox=tkinter.Listbox(frame_wifi, yscrollcommand = scrollbar.set)
-
     line = 1
-
     Wifi_list = Search()
-
     
-
     for name in Wifi_list:
-
        listbox.insert(line, name)
-
        line = line + 1
 
- 
-
     def Retry_double():
-
         global line
-
         for i in range(1,line+1):
-
             listbox.delete(0)
-
         
-
         Wifi_list = Search()
-
         line = 1
-
         for name in Wifi_list:
-
            listbox.insert(line, name)
-
            line = line + 1
-
         
-
     listbox.pack(side="left")
-
     scrollbar["command"]=listbox.yview
-
     
-
     frame_wifi.grid(row = 0, column = 0)#grid
 
- 
-
     frame_under_list = tkinter.Frame(frame_left)
-
     frame_id_insert = tkinter.Frame(frame_under_list)
-
-    button_select = tkinter.Button(frame_id_insert, text = "¼±ÅÃ", overrelief="solid",
-
+    button_select = tkinter.Button(frame_id_insert, text = "ì„ íƒ", overrelief="solid",
                                    height = 1,width=8, command=Ins_double,
-
                                    bg = 'burlywood1')
-
     button_select.pack(side="left")
 
- 
-
-    button_retry = tkinter.Button(frame_id_insert, text = "´Ù½Ã°Ë»ö", overrelief="solid",
-
+    button_retry = tkinter.Button(frame_id_insert, text = "ë‹¤ì‹œê²€ìƒ‰", overrelief="solid",
                                   height = 1,width=8, command=Retry_double,
-
                                   bg = 'burlywood1')
-
     button_retry.pack(side="right") 
-
     
-
     frame_id_insert.pack()
-
     frame_under_list.grid(row = 1, column = 0)#grid
-
-    frame_left.pack(side = "left")
-
+    frame_left.pack(side = "left",expand=1)
     #-----------------------------------------------------------------------
-
- 
 
     #---------------------------------right---------------------------------
-
     frame_keyboard=tkinter.Frame(wi, bg = 'tan')#keyboard
-
     Make_button(frame_keyboard)
-
-    frame_keyboard.pack(side = "right")
-
+    frame_keyboard.pack(side = "right",expand=1)
     #-----------------------------------------------------------------------
 
- 
-
 def Word_education(event):
-
     global long_click_flag
-
     long_click_flag = time.time()
-
-    voice_timmer("Word","´Ü¾îÇĞ½À",5)
-
+    voice_timmer("Word","ë‹¨ì–´í•™ìŠµ",5)
     
-
 def Word_education_double():
-
-    #voice_timmer("demo","µ¥¸ğ",5)
-
+    #voice_timmer("demo","ë°ëª¨",5)
     global word_list, word_index, word_double_flag, word_len, long_click_flag
 
- 
-
     if(time.time() - long_click_flag < 2):
-
         return
-
-    voice_timmer("Move","ÀÌµ¿¿Ï·á",1) 
-
+    voice_timmer("Move","ì´ë™ì™„ë£Œ",1) 
     long_click_flag = time.time()
-
     
-
     word_index = 0
-
-    Word = tkinter.Toplevel()
-
+    Word = tkinter.Toplevel(bg = 'tan', cursor='none')
     Word.attributes("-fullscreen", True)
-
     
-
     def Close(event=None):
-
         global long_click_flag
-
         long_click_flag = time.time()
-
         voice_timmer("Close","back",3.5)
 
- 
-
     def Close_double():
-
         global long_click_flag
-
         if(time.time() - long_click_flag < 2):
-
             return
-
         Word.destroy()
-
-        voice_timmer("Move","ÀÌµ¿¿Ï·á",1) 
-
+        voice_timmer("Move","ì´ë™ì™„ë£Œ",1) 
         long_click_flag = time.time()
 
- 
-
- 
 
         
-
     Word.bind("<F11>", Close_double)
 
- 
-
     def scroll_voice():
-
-        voice_timmer("Scroll","½ºÅ©·Ñ",5)#º¸·ù
-
- 
+        voice_timmer("Scroll","ìŠ¤í¬ë¡¤",5)#ë³´ë¥˜
 
     def Next(event):
-
         global long_click_flag
-
         long_click_flag = time.time()
-
-        voice_timmer("Next","´ÙÀ½ÆäÀÌÁö",5)
-
+        voice_timmer("Next","ë‹¤ìŒí˜ì´ì§€",5)
      
-
     def Next_double():
-
         global long_click_flag
-
         if(time.time() - long_click_flag < 2):
-
             return
-
-        voice_timmer("Push","¹öÆ°´­¸²",1)
-
+        voice_timmer("Push","ë²„íŠ¼ëˆŒë¦¼",1)
         
-
         if(word_index < word_len):
-
-            print("´ÙÀ½ ÆäÀÌÁö Ãâ·ÂÇÏ´Âµ¥ Áö±İÀº ¸·¾ÆµÎ°Ú½À´Ï´Ù.")
-
+            print("ë‹¤ìŒ í˜ì´ì§€ ì¶œë ¥í•˜ëŠ”ë° ì§€ê¸ˆì€ ë§‰ì•„ë‘ê² ìŠµë‹ˆë‹¤.")
         else:
-
-            voice_timmer("Last","¸¶Áö¸·ÆäÀÌÁö",5)
-
+            voice_timmer("Last","ë§ˆì§€ë§‰í˜ì´ì§€",5)
         long_click_flag = time.time()   
-
             
-
     def Sel_double(event=None):
-
         global word_double_flag, long_click_flag
-
         long_click_flag = time.time()
-
         word_double_flag = 1
-
         
-
         if(time.time() - long_click_flag < 2):
-
             return
-
-        voice_timmer("Push","¹öÆ°´­¸²",1)
-
+        voice_timmer("Push","ë²„íŠ¼ëˆŒë¦¼",1)
         
-
         
-
     def Map_wrd(x):
-
         global word_double_flag, long_click_flag
-
         if(word_double_flag):
-
             voice_timmer(x[0],x[0],2)
-
             word_double_flag = 0
-
         else:
-
             if(time.time() - long_click_flag < 3):
-
                 return
-
             data = Smart_File.Read_file("./dot_data/",word_list[x[1]]).split('\n')
-
             print("-----------------------------------------------")
-
-            print("´Ü¾î : " + word_list[x[1]])
-
-            print("±ÛÀÚ ¼ö : " + str(data[0]))
-
+            print("ë‹¨ì–´ : " + word_list[x[1]])
+            print("ê¸€ì ìˆ˜ : " + str(data[0]))
             print("Dot data : " + str(data[1]))
-
-            voice_timmer("Select","´Ü¾î¼±ÅÃ¿Ï·á",5)
-
+            voice_timmer("Select","ë‹¨ì–´ì„ íƒì™„ë£Œ",5)
             #print(word_list[x[1]])
-
             sleep(2)
-
             long_click_flag = time.time()
 
- 
-
     def make_button(index, frame):
-
         global wrd
-
         for r in range(0,4):
-
             for c in range(0,4):
-
                 if(index < word_len):
-
                     wrd = lambda x = [str(word_list[index].replace(".txt","")), index]: Map_wrd(x)
-
                     word_button = tkinter.Button(frame,
-
                                         text = str(word_list[index].replace(".txt","")),
-
                                         overrelief="solid",
-
                                         height = 1,
-
                                         width=8,
-
                                         repeatdelay=100,
-
                                         repeatinterval=100,
-
                                         command=wrd)
-
                     word_button.bind("<Button-1>",Sel_double)
-
                     word_button.grid(row = r, column = c)
-
                     index = index + 1
-
                 else:
-
                     break
-
         return index
-
                 
-
     #----------------------------------------------------------------------
-
     frame_word = tkinter.Frame(Word)
-
     word_index = make_button(word_index, frame_word)
-
     frame_word.pack(anchor = 'c',padx = 30, pady = 30)
-
     #----------------------------------------------------------------------
-
     #----------------------------------------------------------------------
-
     frame_button = tkinter.Frame(Word)
-
     frame_button.pack(anchor = 'c',padx = 30, pady = 10)
-
     #-------------------------------------------------------------------
-
     frame_button_r = tkinter.Button(frame_button,
-
-                                    text = "µÚ·Î°¡±â",
-
+                                    text = "ë’¤ë¡œê°€ê¸°",
                                     overrelief="solid",
-
                                     height = 1,
-
                                     width=8,
-
                                     repeatdelay=100,
-
                                     repeatinterval=100,
-
                                     command=Close_double)
-
     frame_button_r.pack(side = "left",anchor = 'c',padx = 3, pady = 3)
-
     frame_button_r.bind("<Button-1>", Close)
-
     #-------------------------------------------------------------------
-
     frame_button_l = tkinter.Button(frame_button,
-
-                                    text = "´ÙÀ½ ÆäÀÌÁö",
-
+                                    text = "ë‹¤ìŒ í˜ì´ì§€",
                                     overrelief="solid",
-
                                     height = 1,
-
                                     width=8,
-
                                     repeatdelay=100,
-
                                     repeatinterval=100,
-
                                     command=Next_double)
-
     frame_button_l.pack(side = "right",anchor = 'c',padx = 3, pady = 3)
-
     frame_button_l.bind("<Button-1>",Next)
-
     frame_button.pack(anchor = 'c',padx = 3, pady = 3)
-
     #----------------------------------------------------------------------
-
     
-
 def Regist_word():
-
-    voice_timmer("Regist","´Ü¾îµî·Ï",5)
-
-    #»ç¿ëÀÚ ´Ü¾î´Â ¾÷µ¥ÀÌÆ®ÇØµµ ¾È ¾ø¾îÁö°Ô Â¥¾ßÇÑ´Ù.
-
+    voice_timmer("Regist","ë‹¨ì–´ë“±ë¡",5)
+    #ì‚¬ìš©ì ë‹¨ì–´ëŠ” ì—…ë°ì´íŠ¸í•´ë„ ì•ˆ ì—†ì–´ì§€ê²Œ ì§œì•¼í•œë‹¤.
     
-
 def Regist_word_double(event):
-
-    voice_timmer("Demo","µ¥¸ğ",5)
-
+    voice_timmer("Demo","ë°ëª¨",5)
     '''
-
     regist = tkinter.Toplevel()
-
     regist.attributes("-fullscreen", True)
-
     
-
     def Close(event=None):
-
         voice_timmer("Close","back",5)
 
- 
-
     def Close_double(event=None):
-
         regist.destroy()   
-
     regist.bind("<F11>", Close_double)
-
     '''
-
     
-
 def Update():
-
-    voice_timmer("Update","¾÷µ¥ÀÌÆ®",5)
-
- 
+    voice_timmer("Update","ì—…ë°ì´íŠ¸",5)
 
 def Update_double(event):
-
-    #os.system("mpg321 ./sound/µ¥¸ğ.mp3")
-
+    #os.system("mpg321 ./sound/ë°ëª¨.mp3")
     try:
-
         A = fff+123
-
-        #ÀÏºÎ·¯ ¾ÈµÇ´Â ÄÚµå Áı¾î³ÖÀ½, ÀÎÅÍ³İÀÌ ¿¬°á¾ÈµÇ°Å³ª ¼­¹ö°¡ ¿¬°á µÆÀ»¶§¸¸ ½ÇÇàµÇ´ÂºÎºĞ
-
+        #ì¼ë¶€ëŸ¬ ì•ˆë˜ëŠ” ì½”ë“œ ì§‘ì–´ë„£ìŒ, ì¸í„°ë„·ì´ ì—°ê²°ì•ˆë˜ê±°ë‚˜ ì„œë²„ê°€ ì—°ê²° ëì„ë•Œë§Œ ì‹¤í–‰ë˜ëŠ”ë¶€ë¶„
     except:
-
-        voice_timmer("warning","¼­¹ö°æ°í",7)
-
+        voice_timmer("warning","ì„œë²„ê²½ê³ ",7)
         #pass
-
     '''
-
     Up = tkinter.Toplevel()
-
     def Check():
-
         pass      
-
     def Check_double(event):
-
         Up.destroy()
-
-    Up.title("¿À·ù")
-
+    Up.title("ì˜¤ë¥˜")
     Up.geometry("400x240+200+120")
-
     frame_la = tkinter.Frame(Up)
-
-    label=tkinter.Label(frame_la, text="¼­¹ö°¡ ´İÇôÀÖ°Å³ª ¿ÍÀÌÆÄÀÌ°¡ ¿¬°áµÇ¾îÀÖÁö ¾Ê½À´Ï´Ù.")
-
+    label=tkinter.Label(frame_la, text="ì„œë²„ê°€ ë‹«í˜€ìˆê±°ë‚˜ ì™€ì´íŒŒì´ê°€ ì—°ê²°ë˜ì–´ìˆì§€ ì•ŠìŠµë‹ˆë‹¤.")
     label.grid(row = 0 , column = 0, pady="3m")
-
-    button_la=tkinter.Button(frame_la, text = "È®ÀÎ", overrelief="solid", height = 1,width=8, command=Check)
-
+    button_la=tkinter.Button(frame_la, text = "í™•ì¸", overrelief="solid", height = 1,width=8, command=Check)
     button_la.bind("<Double-Button-1>", Check_double)
-
     button_la.grid(row = 1 , column = 0, pady="3m")
-
     frame_la.pack(padx = "3m",pady="15m")
-
-    voice_timmer("warning","¼­¹ö°æ°í",7)
-
+    voice_timmer("warning","ì„œë²„ê²½ê³ ",7)
     '''
-
   
-
 def Free_study(event):
-
     global long_click_flag
-
     long_click_flag = time.time()
-
-    voice_timmer("Free","¼öµ¿¸ğµå", 3)
-
-    #¼öµ¿¸ğµå·Î ³ìÀ½ ´Ù½ÃÇØ¾ßµË´Ï´Ù.
-
-    #¼öµ¿¸ğµå¶û ´Ü¾îÇĞ½À¿¡´Â À½¼Ò°Å Ãß°¡
-
- 
+    voice_timmer("Free","ìˆ˜ë™ëª¨ë“œ", 3)
+    #ìˆ˜ë™ëª¨ë“œë¡œ ë…¹ìŒ ë‹¤ì‹œí•´ì•¼ë©ë‹ˆë‹¤.
+    #ìˆ˜ë™ëª¨ë“œë‘ ë‹¨ì–´í•™ìŠµì—ëŠ” ìŒì†Œê±° ì¶”ê°€
 
 def Free_study_double():
-
     global long_click_flag
-
     if(time.time() - long_click_flag < 2):
-
         return
-
-    voice_timmer("Move","ÀÌµ¿¿Ï·á",1) 
-
+    voice_timmer("Move","ì´ë™ì™„ë£Œ",1) 
     long_click_flag = time.time()
-
-    #¸ğÅÍ ÃÊ±âÈ­ ÇÕ½Ã´Ù.
-
-    #voice_timmer("demo","µ¥¸ğ",5)
-
+    #ëª¨í„° ì´ˆê¸°í™” í•©ì‹œë‹¤.
+    #voice_timmer("demo","ë°ëª¨",5)
     #------------------------------------------------------------
-
-    free = tkinter.Toplevel(background = "tan")
-
+    free = tkinter.Toplevel(background = "tan", cursor='none')
     free.attributes("-fullscreen", True)
-
     def Close(event=None):
-
         global long_click_flag
-
         long_click_flag = time.time()
-
         voice_timmer("Close","back",3)
-
     def Close_double():
-
         global long_click_flag
-
         if(time.time() - long_click_flag < 2):
-
             return
-
-        voice_timmer("Move","ÀÌµ¿¿Ï·á",1) 
-
+        voice_timmer("Move","ì´ë™ì™„ë£Œ",1) 
         free.destroy()
-
         
-
     free.bind("<F11>", Close_double)
-
     
-
     num = []
-
     for i in range(0,72):
-
         num.append(tkinter.IntVar())    
-
     
-
     def Sel(event):
-
         global long_click_flag
-
         long_click_flag = time.time()
-
-        voice_timmer("Sel","Àû¿ë",4)
-
+        voice_timmer("Sel","ì ìš©",4)
         
-
     def Sel_double():
-
         global long_click_flag
-
         if(time.time() - long_click_flag < 2):
-
             return
-
-        voice_timmer("Select","Àû¿ë¿Ï·á",5) 
-
+        voice_timmer("Select","ì ìš©ì™„ë£Œ",5) 
         
-
         for i in range(0,72):
-
             print(num[i].get(), end='')
-
-        #ÀÓ½Ã·Î °ª¸¸ Ãâ·ÂÇÏ´Â ÇÔ¼öÀÓ
-
+        #ì„ì‹œë¡œ ê°’ë§Œ ì¶œë ¥í•˜ëŠ” í•¨ìˆ˜ì„
           
-
     def Map_vos(x):
-
         global toggle_flag
-
         if(toggle_flag.get(str(x[0])+str(x[1]),0) == 0):
-
             toggle_flag[str(x[0])+str(x[1])] = 1
-
             os.system("mpg321 ./sound/"+str(x[0])+str(x[1])+"1.mp3")
-
         else:
-
             toggle_flag[str(x[0])+str(x[1])] = 0
-
             os.system("mpg321 ./sound/"+str(x[0])+str(x[1])+"2.mp3")
-
         
-
   
-
     def Button_in(frame,i,index):
-
         for r in range(6):
-
             vos = lambda x = [i,r+1] : Map_vos(x)
-
             if((r+1) % 2):
-
                 c=0
-
             else:
-
                 c=1
-
             tkinter.Checkbutton(frame,
-
                                 variable=num[index],
-
-                                bg = "tan",
-
+                                bg = "tan1",
                                 padx = 1,
-
                                 pady = 1,
-
                                 command=vos,
-
-                                width = 3,
-
-                                height = 2).grid(row = (r//2), column = c)
-
+                                width = 4,
+                                height = 3).grid(row = (r//2), column = c)
             index += 1    
-
         i += 1
-
         return i, index
-
     #------------------------------------------------------------------
-
     
-
     ####################################################################
-
     #frame_dot = tkinter.Frame(free, background = "tan")
-
     frame_dot = tkinter.Frame(free, background = "tan")
-
     frame_dot.pack(anchor = 'c',padx = 3, pady = 3)
-
     #--------------------------top---------------------------------
-
     frame_up = tkinter.Frame(frame_dot, background = "tan")
-
-    frame_up.pack(side = "top",anchor = 'c',padx = 3, pady = 3,fill="both")
-
+    frame_up.pack(side = "top",anchor = 'c',padx = 3, pady = 3,fill="both",expand=True)
     i = 1
-
     index = 0
-
     
-
     frame_up_sub1 = tkinter.Frame(frame_up, background = "tan")
-
     frame_up_sub1.grid(row = 0, column = 0, ipadx = 4, ipady = 3)
-
     i, index = Button_in(frame_up_sub1,i, index)
-
     
-
     frame_up_sub2 = tkinter.Frame(frame_up, background = "tan")
-
     frame_up_sub2.grid(row = 0, column = 1, ipadx = 4, ipady = 3)
-
     i, index = Button_in(frame_up_sub2,i, index)
 
- 
-
     frame_up_sub3 = tkinter.Frame(frame_up, background = "tan")
-
     frame_up_sub3.grid(row = 0, column = 2, ipadx = 4, ipady = 3)
-
     i, index = Button_in(frame_up_sub3,i, index)
 
- 
-
     frame_up_sub4 = tkinter.Frame(frame_up, background = "tan")
-
     frame_up_sub4.grid(row = 0, column = 3, ipadx = 4, ipady = 3)
-
     i, index = Button_in(frame_up_sub4,i, index)
 
- 
-
     frame_up_sub5 = tkinter.Frame(frame_up, background = "tan")
-
     frame_up_sub5.grid(row = 0, column = 4, ipadx = 4, ipady = 3)
-
     i, index = Button_in(frame_up_sub5,i, index)
 
- 
-
     frame_up_sub6 = tkinter.Frame(frame_up, background = "tan")
-
     frame_up_sub6.grid(row = 0, column = 5, ipadx = 4, ipady = 3)
-
     i, index = Button_in(frame_up_sub6,i, index)
-
     #-------------------------------------------------------------------
-
     
-
     
-
     #------------------------bottom-----------------------------
-
     frame_down = tkinter.Frame(frame_dot, background = "tan")
-
     frame_down.pack(side = "bottom",anchor = 'c',padx = 3, pady = 3,fill="both")
 
- 
-
     frame_up_sub7 = tkinter.Frame(frame_up, background = "tan")
-
     frame_up_sub7.grid(row = 1, column = 0, ipadx = 4, ipady = 3)
-
     i, index = Button_in(frame_up_sub7,i, index)
-
     
-
     frame_up_sub8 = tkinter.Frame(frame_up, background = "tan")
-
     frame_up_sub8.grid(row = 1, column = 1, ipadx = 4, ipady = 3)
-
     i, index = Button_in(frame_up_sub8,i, index)
 
- 
-
     frame_up_sub9 = tkinter.Frame(frame_up, background = "tan")
-
     frame_up_sub9.grid(row = 1, column = 2, ipadx = 4, ipady = 3)
-
     i, index = Button_in(frame_up_sub9,i, index)
 
- 
-
     frame_up_sub10 = tkinter.Frame(frame_up, background = "tan")
-
     frame_up_sub10.grid(row = 1, column = 3, ipadx = 4, ipady = 3)
-
     i, index = Button_in(frame_up_sub10,i, index)
 
- 
-
     frame_up_sub11 = tkinter.Frame(frame_up, background = "tan")
-
     frame_up_sub11.grid(row = 1, column = 4, ipadx = 4, ipady = 3)
-
     i, index = Button_in(frame_up_sub11,i, index)
 
- 
-
     frame_up_sub12 = tkinter.Frame(frame_up, background = "tan")
-
     frame_up_sub12.grid(row = 1, column = 5, ipadx = 4, ipady = 3)
-
     i, index = Button_in(frame_up_sub12,i, index)
-
     
-
     
-
     ####################################################################
-
     frame_button = tkinter.Frame(free, background = "tan")
-
-    frame_button.pack(anchor = 'c',padx = 30, pady = 10)
-
+    frame_button.pack(anchor = 'c',padx = 30, pady = 10,expand=True)
     #-------------------------------------------------------------------
-
     frame_button_r = tkinter.Button(frame_button,
-
-                                    text = "µÚ·Î°¡±â",
-
+                                    text = "ë’¤ë¡œê°€ê¸°",
                                     overrelief="solid",
-
-                                    height = 1,
-
-                                    width=8,
-
+                                    height = 2,
+                                    width=10,
                                     repeatdelay=100,
-
                                     repeatinterval=100,
-
-                                    background = "tan",
-
+                                    background = "burlywood1",
                                     command=Close_double)
-
-    frame_button_r.pack(side = "left",anchor = 'c',padx = 3, pady = 3)
-
+    frame_button_r.pack(side = "left",anchor = 'c',padx = 3, pady = 3,expand=True)
     frame_button_r.bind("<Button-1>", Close)
-
     #-------------------------------------------------------------------
-
     frame_button_l = tkinter.Button(frame_button,
-
-                                    text = "Àû¿ë",
-
+                                    text = "ì ìš©",
                                     overrelief="solid",
-
-                                    height = 1,
-
-                                    width=8,
-
+                                    height = 2,
+                                    width=10,
                                     command=Sel_double,
-
                                     repeatdelay=100,
-
                                     repeatinterval=100,
-
-                                    background = "tan")
-
-    frame_button_l.pack(side = "right",anchor = 'c',padx = 3, pady = 3)
-
+                                    background = "burlywood1")
+    frame_button_l.pack(side = "right",anchor = 'c',padx = 3, pady = 3,expand=True)
     frame_button_l.bind("<Button-1>",Sel)
 
   
-
 def jamo_edu(event):
-
     global long_click_flag
-
     long_click_flag = time.time()
-
-    voice_timmer("Jamo","ÀÚ¸ğÇĞ½À",3)
-
- 
+    voice_timmer("Jamo","ìëª¨í•™ìŠµ",3)
 
 def jamo_edu_double():
-
     global long_click_flag
-
-    if(time.time() - long_click_flag < 2):
-
+    if(time.time() - long_click_flag < 3):
         return
-
-    voice_timmer("Move","ÀÌµ¿¿Ï·á",1) 
-
-    long_click_flag = time.time()
-
-    #¸ğÅÍ ÃÊ±âÈ­ ÇÕ½Ã´Ù.
-
-    #voice_timmer("demo","µ¥¸ğ",5)
-
-    #------------------------------------------------------------
-
-    Jamo = tkinter.Toplevel(background = "tan")
-
-    Jamo.attributes("-fullscreen", True)
-
+    voice_timmer("Move","ì´ë™ì™„ë£Œ",1) 
     
-
+    #ëª¨í„° ì´ˆê¸°í™” í•©ì‹œë‹¤.
+    #voice_timmer("demo","ë°ëª¨",5)
+    #------------------------------------------------------------
+    Jamo = tkinter.Toplevel(background = "tan", cursor='none')
+    Jamo.attributes("-fullscreen", True)
     def Close(event=None):
-
         global long_click_flag
-
         long_click_flag = time.time()
-
         voice_timmer("Close","back",3)
-
     def Close_double(event = None):
-
         global long_click_flag
-
         if(time.time() - long_click_flag < 2):
-
             return
-
-        voice_timmer("Move","ÀÌµ¿¿Ï·á",1)
-
+        voice_timmer("Move","ì´ë™ì™„ë£Œ",1)
         Jamo.destroy()
 
- 
-
     def Chosung(event):
-
         global long_click_flag
-
         long_click_flag = time.time()
+        voice_timmer("Cho","ì´ˆì„±",3)
 
-        voice_timmer("Cho","ÃÊ¼º",3)
-
- 
-
-    #------ÃÊ¼º ÆÄÆ®------
-
+    #------ì´ˆì„± íŒŒíŠ¸------
     def Chosung_double():
-
         global long_click_flag
-
         if(time.time() - long_click_flag < 2):
-
             return
-
        
-
-        voice_timmer("Move","ÀÌµ¿¿Ï·á",1) 
-
+        voice_timmer("Move","ì´ë™ì™„ë£Œ",1) 
         Chosung = tkinter.Toplevel(background = "tan")
-
         Chosung.attributes("-fullscreen", True)
+        char_list = ['ã„±','ã„´','ã„·','ã„¹','ã…','ã…‚','ã……','ã…ˆ','ã…Š','ã…‹','ã…Œ','ã…','ã…','ëœì†Œë¦¬']
 
-        char_list = ['¤¡','¤¤','¤§','¤©','¤±','¤²','¤µ','¤¸','¤º','¤»','¤¼','¤½','¤¾']
 
- 
-
- 
-
-        #------µÚ·Î°¡±â¶û ÃÊ±â È­¸éÀ¸·Î ºÎºĞ------
-
+        #------ë’¤ë¡œê°€ê¸°ë‘ ì´ˆê¸° í™”ë©´ìœ¼ë¡œ ë¶€ë¶„------
         def Close_top(event):
-
             global long_click_flag
-
             long_click_flag = time.time()
-
             voice_timmer("Close","back",3)
-
             
-
         def Close_top_double(event=None):
-
             global long_click_flag
-
             if(time.time() - long_click_flag < 2):
-
                 return
-
-            voice_timmer("Move","ÀÌµ¿¿Ï·á",1) 
-
+            voice_timmer("Move","ì´ë™ì™„ë£Œ",1) 
             Chosung.destroy()
-
- 
 
         def Initialize(event):
-
             global long_click_flag
-
             long_click_flag = time.time()
-
-            voice_timmer("Initial","ÃÊ±âÈ­¸é",3)
-
+            voice_timmer("Initial","ì´ˆê¸°í™”ë©´",3)
             
-
         def Initialize_double():
-
             global long_click_flag
-
             if(time.time() - long_click_flag < 2):
-
                 return
-
-            voice_timmer("Move","ÀÌµ¿¿Ï·á",1)
-
+            voice_timmer("Move","ì´ë™ì™„ë£Œ",1)
             Chosung.destroy()
-
             Jamo.destroy()
-
             
-
             
-
         Chosung.bind("<F11>", Close_top_double)
 
- 
-
         frame_sel_exit = tkinter.Frame(Chosung, background = "tan")
-
         frame_sel_exit.pack(side = "bottom", anchor = 'c',padx = 10, pady = 3)
-
-        button1 = tkinter.Button(frame_sel_exit, text="µÚ·Î°¡±â",command = Close_top_double,
-
+        button1 = tkinter.Button(frame_sel_exit, text="ë’¤ë¡œê°€ê¸°",command = Close_top_double,
                                  repeatdelay=100,
-
                                  repeatinterval=100,
-
                                  height = 3, width = 15,
-
                                  background = 'tan1')
-
         button1.bind("<Button-1>", Close_top)
-
         button1.pack(side = "left");
 
- 
-
-        button2 = tkinter.Button(frame_sel_exit, text="ÃÊ±â È­¸éÀ¸·Î",command = Initialize_double,
-
+        button2 = tkinter.Button(frame_sel_exit, text="ì´ˆê¸° í™”ë©´ìœ¼ë¡œ",command = Initialize_double,
                                  repeatdelay=100,
-
                                  repeatinterval=100,
-
                                  height = 3, width = 15,
-
                                  background = 'tan1')
-
         button2.bind("<Button-1>", Initialize)
-
         button2.pack(side = "right");
 
- 
-
-        
-
- 
-
         
 
         
-
- 
+        
 
     def Moum(event):
-
         global long_click_flag
-
         long_click_flag = time.time()
-
-        voice_timmer("Moum","¸ğÀ½",3)
-
+        voice_timmer("Moum","ëª¨ìŒ",3)
     def Moum_double():
-
         pass
-
     
-
     def jongsung(event):
-
         global long_click_flag
-
         long_click_flag = time.time()
-
-        voice_timmer("Jong","Á¾¼º",3)
-
+        voice_timmer("Jong","ì¢…ì„±",3)
     def jongsung_double():
-
         pass
-
     
-
     def simple_house(event):
-
         global long_click_flag
-
         long_click_flag = time.time()
-
-        voice_timmer("Simple","¾àÀÚ",3)
-
- 
+        voice_timmer("Simple","ì•½ì",3)
 
     def simple_house_double():
-
         pass
-
         
-
         
-
     Jamo.bind("<F11>", Close_double)
-
-    #---------ÃÊ¼º ¸ğÀ½ Á¾¼º ¾àÀÚ -----------------
-
+    #---------ì´ˆì„± ëª¨ìŒ ì¢…ì„± ì•½ì -----------------
     frame_edu = tkinter.Frame(Jamo, background = "tan")
-
-    frame_edu.pack(side = "top", anchor = 'c',padx = 3, pady = 3)
-
-    button1 = tkinter.Button(frame_edu, text="ÃÊ¼º",command = Chosung_double,
-
+    frame_edu.pack(side = "top", anchor = 'c',padx = 3, pady = 3,expand=True)
+    button1 = tkinter.Button(frame_edu, text="ì´ˆì„±",command = Chosung_double,
                              repeatdelay=100,
-
                              repeatinterval=100,
-
-                             height = 10, width = 18,
-
-                             background = 'tan1')
-
+                             relief = 'solid',
+                             height = 16, width = 23,
+                             background = 'burlywood1')
     button1.bind("<Button-1>", Chosung)
-
     button1.grid(row = 0, column = 0)
 
- 
-
-    button2 = tkinter.Button(frame_edu, text="¸ğÀ½",command = Moum_double,
-
+    button2 = tkinter.Button(frame_edu, text="ëª¨ìŒ",command = Moum_double,
                              repeatdelay=100,
-
                              repeatinterval=100,
-
-                             height = 10, width = 18,
-
+                             relief = 'solid',
+                             height = 16, width = 23,
                              background = 'tan1')
-
     button2.bind("<Button-1>", Moum)
-
     button2.grid(row = 0, column = 1)
 
- 
-
-    button3 = tkinter.Button(frame_edu, text="Á¾¼º",command = jongsung_double,
-
+    button3 = tkinter.Button(frame_edu, text="ì¢…ì„±",command = jongsung_double,
                              repeatdelay=100,
-
                              repeatinterval=100,
-
-                             height = 10, width = 18,
-
-                             background = 'tan1')
-
+                             relief = 'solid',
+                             height = 16, width = 23,
+                             background = 'burlywood1')
     button3.bind("<Button-1>", jongsung)
-
     button3.grid(row = 0, column = 2)
 
- 
-
-    button4 = tkinter.Button(frame_edu, text="¾àÀÚ",command = simple_house_double,
-
+    button4 = tkinter.Button(frame_edu, text="ì•½ì",command = simple_house_double,
                              repeatdelay=100,
-
                              repeatinterval=100,
-
-                             height = 10, width = 18,
-
+                             relief = 'solid',
+                             height = 16, width = 23,
                              background = 'tan1')
-
     button4.bind("<Button-1>", simple_house)
-
     button4.grid(row = 0, column = 3)
 
- 
-
-    #µÚ·Î°¡±â ¹öÆ°
-
+    #ë’¤ë¡œê°€ê¸° ë²„íŠ¼
     
-
     frame_sel_exit = tkinter.Frame(Jamo, background = "tan")
-
     frame_sel_exit.pack(side = "bottom", anchor = 'c',padx = 10, pady = 3)
-
-    button5 = tkinter.Button(frame_sel_exit, text="µÚ·Î°¡±â",command = Close_double,
-
+    button5 = tkinter.Button(frame_sel_exit, text="ë’¤ë¡œê°€ê¸°",command = Close_double,
                              repeatdelay=100,
-
                              repeatinterval=100,
-
-                             height = 3, width = 15,
-
-                             background = 'tan1')
-
+                             relief = 'solid',
+                             height = 3, width = 20,
+                             background = 'tan3')
     button5.bind("<Button-1>", Close)
-
     button5.pack();
-
- 
-
-    #voice_timmer("demo","µ¥¸ğ",5)
-
- 
+    
+    #voice_timmer("demo","ë°ëª¨",5)
 
 def exit_(event):
-
     global long_click_flag
-
     long_click_flag = time.time() 
-
-    voice_timmer("Exit","»ç¿ëÁ¾·á",3)
-
- 
+    voice_timmer("Exit","ì‚¬ìš©ì¢…ë£Œ",3)
 
 def exit_double():
-
     global long_click_flag
-
     if(time.time() - long_click_flag < 3):
-
         return
-
-    voice_timmer("Exit_true","»ç¿ëÀ»Á¾·áÇÕ´Ï´Ù",3)
-
+    voice_timmer("Exit_true","ì‚¬ìš©ì„ì¢…ë£Œí•©ë‹ˆë‹¤",3)
     window.destroy()
-
     long_click_flag = time.time()
-
-    #motor ´Ù ³»¸®±â
-
+    #motor ë‹¤ ë‚´ë¦¬ê¸°
     #os.~~~ exit
 
- 
-
 if __name__ == '__main__':
+    '''
+    fake = tkinter.Tk()
+    fake.title("logo")
+    fake.geometry("640x400+100+100")
 
+
+    #fake.attributes("-fullscreen", True)
+    img = tkinter.PhotoImage(file='dotdot.gif')
+    lbl = tkinter.Label(image = img)
+    lbl.image = img
+    lbl.place(x=50,y=50)
+
+    
+    canvas = tkinter.Canvas(fake,width = 800, height = 460)
+    canvas.create_image(0, 0, anchor = tkinter.NW, image =img)
+    canvas.pack()
+    
+    fake.mainloop()
+
+    sleep(3)
+
+    fake.destroy()
+    '''
     window.title("Graduation Project")
-
     window.geometry("640x400+100+100")
 
-    window.configure(background='tan')
 
- 
-
-    #ÃÖÃÊ ½ÇÇà½Ã ¸ğÅÍ ÃÊ±âÈ­ ¹× °¢µµ¼¼ÆÃ
-
+    window.configure(background='tan', cursor='none')
+    window.attributes("-fullscreen", True)
+    img = tkinter.PhotoImage(file='dotdot.gif')
+    lbl = tkinter.Label(image = img)
+    lbl.image = img
+    lbl.place(x=50,y=50)
+    
+    
+    #window.configure(background='tan')
+    
+    #ìµœì´ˆ ì‹¤í–‰ì‹œ ëª¨í„° ì´ˆê¸°í™” ë° ê°ë„ì„¸íŒ…
     #window.resizable(False, False)
-
     #frame = Frame(window, width=600, height=300)
 
- 
-
     def toggle_fullscreen(event=None):
-
         window.state = not window.state  # Just toggling the boolean
-
         window.attributes("-fullscreen", window.state)
-
         return "break"    
-
     window.bind("<F11>", toggle_fullscreen)
 
- 
-
     frame1=tkinter.Frame(window,background="tan")
-
-    button1 = tkinter.Button(frame1, text="¿ÍÀÌÆÄÀÌ ¿¬°á",command = Connect_wifi_double,
-
+    button1 = tkinter.Button(frame1, text="ì™€ì´íŒŒì´ ì—°ê²°",command = Connect_wifi_double,
                              repeatdelay=100,
-
                              repeatinterval=100,
-
-                             height = 10, width = 18,
-
+                             height = 12, width = 22,
+                             relief = 'solid',
                              background = 'tan1')
-
     button1.bind("<Button-1>", Connect_wifi)
-
-    button2 = tkinter.Button(frame1, text="´Ü¾î ÇĞ½À", command = Word_education_double,
-
+    button2 = tkinter.Button(frame1, text="ë‹¨ì–´ í•™ìŠµ", command = Word_education_double,
                              repeatdelay=100,
-
                              repeatinterval=100,
-
-                             height = 10, width = 18,
-
+                             height = 12, width = 22,
+                             relief = 'solid',
                              background = "burlywood1")
-
- 
 
     button2.bind("<Button-1>", Word_education)
 
- 
-
-    button3 = tkinter.Button(frame1, text="ÀÚÀ½,¸ğÀ½ ¹× ¾àÀÚ ÇĞ½À", command = jamo_edu_double,
-
+    button3 = tkinter.Button(frame1, text="ììŒ,ëª¨ìŒ ë° ì•½ì í•™ìŠµ", command = jamo_edu_double,
                              repeatdelay=100,
-
                              repeatinterval=100,
-
-                             height = 10, width = 18,
-
+                             height = 12, width = 22,
+                             relief = 'solid',
                              background = 'tan1')
-
     button3.bind("<Button-1>", jamo_edu)
-
     
-
-    button4 = tkinter.Button(frame1, text="¾÷µ¥ÀÌÆ®", command = Update, height = 10, width = 18)
-
+    button4 = tkinter.Button(frame1, text="ì—…ë°ì´íŠ¸",bg = 'tan1',
+                             command = Update,
+                             relief = 'solid', height = 12, width = 22)
     button4.bind("<Double-Button-1>", Update_double)
-
     
-
-    button5 = tkinter.Button(frame1, text="¼öµ¿ ¸ğµå", command = Free_study_double,
-
+    button5 = tkinter.Button(frame1, text="ìˆ˜ë™ ëª¨ë“œ", command = Free_study_double,
                              repeatdelay=100,
-
                              repeatinterval=100,
-
-                             height = 10, width = 18,
-
+                             height = 12, width = 22,
+                             relief = 'solid',
                              background = "burlywood1")
-
     button5.bind("<Button-1>", Free_study)
-
     
-
-    button6 = tkinter.Button(frame1, text="´Ü¾î µî·Ï", command = Regist_word, height = 10, width = 18)
-
+    button6 = tkinter.Button(frame1, text="ë‹¨ì–´ ë“±ë¡", bg = 'tan1',relief = 'solid',
+                             command = Regist_word, height = 12, width = 22)
     button6.bind("<Double-Button-1>", Regist_word_double)
-
     
-
-    button7 = tkinter.Button(frame1, text="»ç¿ë Á¾·á", command = exit_double,
-
+    button7 = tkinter.Button(frame1, text="ì‚¬ìš© ì¢…ë£Œ", command = exit_double,
                              repeatdelay=100,
-
                              repeatinterval=100,
-
-                             height = 10, width = 18,
-
+                             height = 12, width = 22,
+                             relief = 'solid',
                              background = "burlywood1")
-
- 
 
     button7.bind("<Button-1>", exit_)
 
- 
-
     
-
     button1.grid(row = 0, column = 0)
-
     button2.grid(row = 0, column = 1)
-
     button3.grid(row = 0, column = 2)
-
     button4.grid(row = 1, column = 0)
-
     button5.grid(row = 1, column = 1)
-
     button6.grid(row = 1, column = 2)
 
- 
-
     button7.grid(row = 0, column = 3)
-
-     #¿ŞÂÊ ¸¶¿ì½º ¹öÆ° ¹ÙÀÎµù
-
-    frame1.pack();
-
+     #ì™¼ìª½ ë§ˆìš°ìŠ¤ ë²„íŠ¼ ë°”ì¸ë”©
+    frame1.pack(expand=True);
     window.mainloop()

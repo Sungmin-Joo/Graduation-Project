@@ -79,12 +79,11 @@ def post():
 @app.route('/shutdown')
 def shutdown():
     shutdown_server()
-    return 'Server shutting down...'   
+    return 'Server shutting down...'
 
 if __name__ == '__main__':
     print('Func_called - main')
-    app.run(host="0.0.0.0", port=5000, debug = True)
+    app.run(host="0.0.0.0", port=30000, debug = True)
 
 else:
     print('Func_called - imported')
-    
