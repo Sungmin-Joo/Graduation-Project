@@ -1,0 +1,6 @@
+import numpy as np
+import cv2
+
+print("fff")
+img = cv2.imread('Fig6.48(b).jpg',0) 
+cv2.imshow('fwef',img)
