@@ -65,10 +65,17 @@ The following code implements touch (jesture) for the blind.
         voice_timmer("exmaple","exmaple",3)
 
     def exmaple_double():
-        global long_click_flag, now_data_k, now_voice_route
+        global long_click_flag
         if(time.time() - long_click_flag < 2):
             return
         long_click_flag = time.time()
+    ------ skip -----    
+    button1 = tkinter.Button(frame1, text="exmaple",
+                             command = exmaple_double,
+                             repeatdelay=100,
+                             repeatinterval=100)
+    button1.bind("<Button-1>", exmaple)
+         
 ```
 ### Videos and Pictures to Demonstrate
 
