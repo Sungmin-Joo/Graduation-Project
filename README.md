@@ -69,7 +69,9 @@ The following code implements touch (jesture) for the blind.
         if(time.time() - long_click_flag < 2):
             return
         long_click_flag = time.time()
-    ------ skip -----    
+        
+    ------------------    skip    ------------------    
+    
     button1 = tkinter.Button(frame1, text="exmaple",
                              command = exmaple_double,
                              repeatdelay=100,
