@@ -2,6 +2,7 @@
 
 One Paragraph of project description goes here
 
+
 ## Getting Started
 
 We have implemented educational kits for people who are blind using various open sources and libraries.  
@@ -30,19 +31,19 @@ Development Environment :
 Libraries :
 
 
-    Python built-in library   
-    flask  
+    * Python built-in library   
+    * flask  
         - Open download server  
-    wifi  
+    * wifi  
         - Control Wi-Fi using Python  
-    gTTS  
-    speech-recognition  
+    * gTTS  
+    * speech-recognition  
         - Using "Google text to speech" to implement voice recognition via a microphone in Python  
-    hbcvt  
+    * hbcvt  
         - A library that converts Hangul into Braille  
           ( https://github.com/hyonzin/hangul-braille-converter )  
-    Adafruit_PCA9685  
-    adafruit_servokit  
+    * Adafruit_PCA9685  
+    * adafruit_servokit  
         - Used for motor control  
 
 
