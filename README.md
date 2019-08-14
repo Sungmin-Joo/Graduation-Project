@@ -1,6 +1,7 @@
 # Edu_dot - Graduation_Project
 
-One Paragraph of project description goes here
+Braille Board for the Blind
+
 
 
 ## Getting Started
@@ -69,6 +70,10 @@ The following code implements touch (jesture) for the blind.
             return
         long_click_flag = time.time()
 ```
+### Videos and Pictures to Demonstrate
+
+You can see it by visiting the demo folder.
+
 
 ## Developer :  
 
