@@ -16,6 +16,11 @@ The "Eud.dot_first_confirm" folder contains some of the code that was first revi
 The "development process" folder contains the development process of the main source code.  
 The "demo" folder contains videos and pictures that actually work
 
+### Awards and Honors
+* 2019 창의적 사업계획서 경진대회 - 우수상 ()
+
+
+
 ### Prerequisites
 
 Development Environment :
