@@ -85,7 +85,7 @@ You can see it by visiting the demo folder.
 
 ## Developer :  
 
-    Joo Sung-Min :  
+    주성민(Joo Sung-Min) :  
         - Voice Recognition -> Braille Transformation  
         - Deploying a Download Server  
         - UI Designing for Visually Impaired  
