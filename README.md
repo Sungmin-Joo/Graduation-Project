@@ -93,7 +93,7 @@ You can see it by visiting the demo folder.
         
 ## Built With
 
-* [김민섭] - Team leader, collecting information about the visually impaired and Braille.  
+* [김민섭](https://github.com/miseop25) - Team leader, collecting information about the visually impaired and Braille.  
 * [서형진] - Design hardware.  
 * [임건영] - Control motors.  
 
