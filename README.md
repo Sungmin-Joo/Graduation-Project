@@ -1,6 +1,7 @@
 # Graduation_Project
 Edu.Dot
-======
+===========
+
 This is the software source code for edu_dot team (the graduation project) of the Korea Polytechnic University.
 
 The "dip" folder is located under "/home/pi/" in "Raspberry Pi".
