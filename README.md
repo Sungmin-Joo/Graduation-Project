@@ -20,7 +20,7 @@ The "demo" folder contains videos and pictures that actually work
 * 2019 창의적 사업계획서 경진대회 - 우수상
 
 
-[](https://github.com/Sungmin-Joo/Graduation_Project/tree/master/Awards_and_Honors)
+* [](https://github.com/Sungmin-Joo/Graduation_Project/tree/master/Awards_and_Honors)
 
 
 ### Prerequisites
