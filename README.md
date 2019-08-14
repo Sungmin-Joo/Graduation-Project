@@ -1,17 +1,25 @@
-# Graduation_Project
-## Edu.Dot
+# Edu_dot - Graduation_Project
+
+One Paragraph of project description goes here
+
+## Getting Started
+
+We have implemented educational kits for people who are blind using various open sources and libraries.  
+To run main code without hardware, I2C-related functions of the main code shall be annotated.  
 
 
-This is the software source code for edu_dot team (the graduation project) of the Korea Polytechnic University.
+This is the software source code for edu_dot team (the graduation project) of the Korea Polytechnic University.  
+The "dip" folder is located under "/home/pi/" in "Raspberry Pi".  
+The "Eud.dot_first_confirm" folder contains some of the code that was first reviewed.  
+I saved it for memory.  
+The "development process" folder contains the development process of the main source code.  
 
-The "dip" folder is located under "/home/pi/" in "Raspberry Pi".
 
-The "Eud.dot_first_confirm" folder contains some of the code that was first reviewed.
-I saved it for memory.
+### Prerequisites
 
-The "development process" folder contains the development process of the main source code.
+Development Environment :
 
-Development Environment :  
+
     server :  
         Window 10 + flask     
     client :  
@@ -19,7 +27,9 @@ Development Environment :
         
         
 
-Libraries :  
+Libraries :
+
+
     Python built-in library   
     flask  
         - Open download server  
@@ -34,21 +44,46 @@ Libraries :
     Adafruit_PCA9685  
     adafruit_servokit  
         - Used for motor control  
-  
-Developer :  
+
+
+## How to use
+
+Braille learning can be done by manipulating the UI for the blind.  
+Once pressed, a voice message is heard for that button, and another long push is used to perform the function of that button.
+
+
+### example algorithm
+
+The following code implements touch (jesture) for the blind.
+
+```
+    def exmaple(event):
+        global long_click_flag
+        long_click_flag = time.time()
+        voice_timmer("exmaple","exmaple",3)
+
+    def exmaple_double():
+        global long_click_flag, now_data_k, now_voice_route
+        if(time.time() - long_click_flag < 2):
+            return
+        long_click_flag = time.time()
+```
+
+## Developer :  
+
     Joo Sung-Min :  
         - Voice Recognition -> Braille Transformation  
         - Deploying a Download Server  
         - UI Designing for Visually Impaired  
         - Overall software design	  
-  
-Team Member :  
-    김민섭 :  
-        - Team leader  
-        - Collecting information about the visually impaired and Braille  
-        - The presentation of various examinations and competitions  
-    서형진 :  
-        - Design hardware  
-    임건영 :  
-        - Control motors  
-  
+        
+## Built With
+
+* [김민섭] - Team leader, collecting information about the visually impaired and Braille.  
+* [서형진] - Design hardware.  
+* [임건영] - Control motors.  
+
+
+# Graduation_Project
+## Edu.Dot
+
