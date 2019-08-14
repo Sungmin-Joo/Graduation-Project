@@ -10,10 +10,19 @@ I saved it for memory.
 The "development process" folder contains the development process of the main source code.
 
 Development Environment :
+
     server :
+    
+    
         Window 10 + flask
+        
+        
     client :
+    
+    
         Raspberry Pi
+        
+        
 
 Libraries :
     Python built-in library 
