@@ -17,7 +17,7 @@ def convert_dot(dot_list):
 
     return t_list
 
-if '__main__':
+if __name__ == '__main__':
     test = [[0,1,0,1,0,1],[1,1,1,0,0,0],[1,0,0,0,0,1,1,1,1,0,0,0]]
 
     for _ in test:
