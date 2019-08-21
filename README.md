@@ -1,7 +1,8 @@
 # Edu_dot - Graduation_Project
 
 Braille Board for the Blind
-
+![1](https://user-images.githubusercontent.com/46941349/63397239-e99ffb80-c404-11e9-819f-b4874defdf30.PNG)  
+![2](https://user-images.githubusercontent.com/46941349/63397240-ead12880-c404-11e9-965c-66fd3942bbd2.PNG)  
 
 
 ## Getting Started
