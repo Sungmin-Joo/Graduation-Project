@@ -1,6 +1,6 @@
 # Edu_dot - Graduation_Project
 
-Braille Board for the Blind
+## Braille Board for the Blind  
 ![1](https://user-images.githubusercontent.com/46941349/63397239-e99ffb80-c404-11e9-819f-b4874defdf30.PNG)  
 ![2](https://user-images.githubusercontent.com/46941349/63397240-ead12880-c404-11e9-965c-66fd3942bbd2.PNG)  
 
@@ -85,13 +85,17 @@ The following code implements touch (jesture) for the blind.
                              repeatinterval=100)
     button1.bind("<Button-1>", exmaple)
          
-```
+```  
+  
+  
 ### Videos and Pictures
 
 You can see it by visiting the demo folder.
 
+
 ## S/W development process:  
  * 08/21/2019 : Complete all planned functions  
+ 
  
  
 ## Developer :  
