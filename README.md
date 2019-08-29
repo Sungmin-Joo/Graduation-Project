@@ -5,7 +5,7 @@
 ![2](https://user-images.githubusercontent.com/46941349/63397240-ead12880-c404-11e9-965c-66fd3942bbd2.PNG)  
 
 
-## * Getting Started
+## o Getting Started
 
 We have implemented educational kits for people who are blind using various open sources and libraries.  
 To run main code without hardware, I2C-related functions of the main code shall be annotated.  
@@ -17,14 +17,14 @@ The "Eud.dot_first_confirm" folder contains some of the code that was first revi
 The "development process" folder contains the development process of the main source code.  
 The "demo" folder contains videos and pictures that actually work
 
-## * Awards and Honors
+## o Awards and Honors
 * 2019 창의적 사업계획서 경진대회 - 우수상
 
 
 * [Link](https://github.com/Sungmin-Joo/Graduation_Project/tree/master/Awards_and_Honors)
 
 
-## * Prerequisites
+## o Prerequisites
 
 Development Environment :
 
@@ -55,7 +55,7 @@ Libraries :
         - Used for motor control  
 
 
-## * How to use
+## o How to use
 
 Braille learning can be done by manipulating the UI for the blind.  
 Once pressed, a voice message is heard for that button, and another long push is used to perform the function of that button.
@@ -88,17 +88,17 @@ The following code implements touch (jesture) for the blind.
 ```  
   
   
-## * Videos and Pictures
+## o Videos and Pictures
 
 You can see it by visiting the demo folder.
 
 
-## * S/W development process:  
+## o S/W development process:  
  * 08/21/2019 : Complete all planned functions  
  
  
  
-## * Developer :  
+## o Developer :  
 
     주성민(Joo Sung-Min) :  
         - Voice Recognition -> Braille Transformation  
@@ -106,7 +106,7 @@ You can see it by visiting the demo folder.
         - UI Designing for Visually Impaired  
         - Overall software design	  
         
-## * Built With
+## o Built With
 
 * [김민섭](https://github.com/miseop25) - Team leader, collecting information about the visually impaired and Braille.  
 * [서형진] - Design hardware.  
