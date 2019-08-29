@@ -90,7 +90,10 @@ The following code implements touch (jesture) for the blind.
 
 You can see it by visiting the demo folder.
 
-
+## S/W development process:  
+ * 08/21/2019 : Complete all planned functions  
+ 
+ 
 ## Developer :  
 
     주성민(Joo Sung-Min) :  
@@ -105,7 +108,4 @@ You can see it by visiting the demo folder.
 * [서형진] - Design hardware.  
 * [임건영] - Control motors.  
 
-
-# Graduation_Project
-## Edu.Dot
 
