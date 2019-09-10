@@ -12,12 +12,17 @@ import hbcvt
 import gtts
 import lim_code as srv
 import random
+import down_module as dm
+import pyautogui
+import dot_convert as dc
+import tkinter.font
 from gtts import gTTS
+from tkinter import messagebox as mb
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(18, GPIO.OUT)
 
-
+wifi_flag=0
 voice_flags = dict()
 toggle_flag = dict()
 word_double_flag = 0
@@ -33,17 +38,7 @@ big_array = ['~','!','@','#','$','%','^','&','*','(',')','_','+',
              'Q','W','E','R','T','Y','U','I','O','P','{','}',
              'A','S','D','F','G','H','J','K','L',':',
              'Z','X','C','V','B','N','M','<','>','?','Space','Shift','Erase']
-
-
-Traffic_route_voice = "/home/pi/dip/sound/traffic/"
-Traffic_route_data = "/home/pi/dip/dot_data/traffic/" 
-word_trf_list = Smart_File.Find_dir_format(Traffic_route_data,".txt")
-word_trf_len = len(word_trf_list)
-
-Manual_route_voice = "/home/pi/dip/sound/manual/"
-Manual_route_data = "/home/pi/dip/dot_data/manual/" 
-word_manual_list = Smart_File.Find_dir_format(Manual_route_data,".txt")
-word_manual_len = len(word_manual_list)
+os.system('sudo amixer cset numid=1 88%')
 
 Food_root_voice = "/home/pi/dip/sound/food/"
 Food_root_data = "/home/pi/dip/dot_data/food/" 
@@ -55,11 +50,51 @@ Location_root_data = "/home/pi/dip/dot_data/location/"
 word_location_list = Smart_File.Find_dir_format(Location_root_data,".txt")
 word_location_len = len(word_location_list)
 
+Traffic_route_voice = "/home/pi/dip/sound/traffic/"
+Traffic_route_data = "/home/pi/dip/dot_data/traffic/" 
+word_trf_list = Smart_File.Find_dir_format(Traffic_route_data,".txt")
+word_trf_len = len(word_trf_list)
+
+d_list=[Food_root_data, Location_root_data, Traffic_route_data]
+v_list=[Food_root_voice, Location_root_voice, Traffic_route_voice]
+
+Manual_route_voice = "/home/pi/dip/sound/manual/"
+Manual_route_data = "/home/pi/dip/dot_data/manual/" 
+word_manual_list = Smart_File.Find_dir_format(Manual_route_data,".txt")
+word_manual_len = len(word_manual_list)
+
+version_dir='/home/pi/dip/setting/version.txt'
+
 mp3_route = "mpg321 /home/pi/dip/sound/"
 mp3_route_regit = "/home/pi/dip/sound/"
-agree=['응','어','네','넵','그렇습니다','그래','엉','넹','으응']
+agree=['응','어','네','넵','그렇습니다','그래','엉','넹','으응','맞아요','예스']
 r = sr.Recognizer()
 
+simple_k_list = [
+    ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ','된소리'],
+    ['ㅏ','ㅑ','ㅓ','ㅕ','ㅗ','ㅛ','ㅜ','ㅠ','ㅡ','ㅣ','ㅐ','ㅔ','ㅚ','ㅘ','ㅝ','ㅢ','ㅖ','ㅟ','ㅒ','ㅙ','ㅞ'],
+    ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'],
+    ['가','나','다','마','바','사','자','카','타','파','하','것','ㅆ받침','억','언','얼','연','열','영','옥','온','옹','운','울','은','을','인'],
+    ['그래서','그러나','그러면','그러므로','그런데','그리고']
+    ]
+simple_d_list = [
+    [[0,1,0,0,0,0], [1,1,0,0,0,0], [0,1,1,0,0,0], [0,0,0,1,0,0], [1,0,0,1,0,0], [0,1,0,1,0,0], [0,0,0,0,0,1],
+     [0,1,0,0,0,1], [0,0,0,1,0,1], [1,1,1,0,0,0], [1,0,1,1,0,0], [1,1,0,1,0,0], [0,1,1,1,0,0], [0,0,0,0,0,1]],
+    [[1,0,1,0,0,1], [0,1,0,1,1,0], [0,1,1,0,1,0], [1,0,0,1,0,1], [1,0,0,0,1,1], [0,1,0,0,1,1], [1,1,0,0,1,0],
+     [1,1,0,0,0,1], [0,1,1,0,0,1], [1,0,0,1,1,0], [1,0,1,1,1,0], [1,1,0,1,1,0], [1,1,0,1,1,1], [1,0,1,0,1,1],
+     [1,1,1,0,1,0], [0,1,1,1,0,1], [0,1,0,0,1,0], [1,1,0,0,1,0,1,0,1,1,1,0], [0,1,0,1,1,0,1,0,1,1,1,0],
+     [1,0,1,0,1,1,1,0,1,1,1,0], [1,1,1,0,1,0,1,0,1,1,1,0]],
+    [[1,0,0,0,0,0], [0,0,1,1,0,0], [0,0,0,1,1,0], [0,0,1,0,0,0], [0,0,1,0,0,1], [1,0,1,0,0,0], [0,0,0,0,1,0],
+     [0,0,1,1,1,1], [1,0,0,0,1,0], [0,0,1,0,1,0], [0,0,1,1,1,0], [0,0,1,0,1,1], [0,0,1,1,0,1], [0,0,0,1,1,1]],
+    [[1,1,1,0,0,1], [1,1,0,0,0,0], [0,1,1,0,0,0], [1,0,0,1,0,0], [0,1,0,1,0,0], [1,0,1,0,1,0], [0,1,0,0,0,1],
+     [1,1,1,0,0,0], [1,0,1,1,0,0], [1,1,0,1,0,0], [0,1,1,1,0,0], [0,1,0,1,0,1,0,1,1,0,1,0],[0,1,0,0,1,0],
+     [1,1,0,1,0,1], [0,1,1,1,1,1], [0,1,1,1,1,0], [1,0,0,0,0,1], [1,0,1,1,0,1], [1,1,1,1,0,1], [1,1,0,0,1,1],
+     [1,0,1,1,1,1], [1,1,1,1,1,1], [1,1,1,1,0,0], [1,1,1,0,1,1], [1,0,0,1,1,1], [0,1,1,0,1,1], [1,1,1,1,1,0]],
+    [[1,0,0,0,0,0,0,1,1,0,1,0], [1,0,0,0,0,0,1,1,0,0,0,0], [1,0,0,0,0,0,0,0,1,1,0,0], [1,0,0,0,0,0,0,0,1,0,0,1],
+     [1,0,0,0,0,0,1,1,0,1,1,0], [1,0,0,0,0,0,1,0,0,0,1,1]]
+    ]
+t_x = [2,3,2,3,2]
+t_y = [7,7,7,9,3]
     
 ####################### call lim's code  ########################
 kit_list = srv.setup()
@@ -68,10 +103,10 @@ srv.clear_all(kit_list)
 
 def word_sheet(root_data,root_sound,word_list,word_len,parent):
     global word_index
-    Func_top = tkinter.Toplevel(background = "tan")
+    Func_top = tkinter.Toplevel(background = "tan", cursor='none')
     Func_top.geometry("800x480")
     Func_top.attributes("-fullscreen", True)
-    word_index = 0 
+    word_index = 0
    
   
     def Map_wrd(x):
@@ -86,7 +121,7 @@ def word_sheet(root_data,root_sound,word_list,word_len,parent):
             d_list.append(int(i))
         [d_list.append(0) for i in range(72-len(d_list))]
         print(d_list) #확인
-        active(d_list,kit_list)
+        srv.active(d_list,kit_list)
                      
     def make_button(index):
         global Func_frame
@@ -94,22 +129,28 @@ def word_sheet(root_data,root_sound,word_list,word_len,parent):
         if(index != 0):
             Func_frame.destroy()          
         Func_frame = tkinter.Frame(Func_top,background = "tan")
-        Func_frame.pack(side = "top", anchor = 'c',padx = 10, pady = 3,expand=True)      
+        Func_frame.pack(side = "top", anchor = 'c',expand=True)      
         for r in range(3):
             for c in range(7):
                 if(color_flag):
-                    color_= 'tan1'
+                    color_= '#222b3f'
+                    fg_color = 'tan'
                     color_flag=0
                 else:
                     color_= 'burlywood1'
+                    fg_color = 'black'
                     color_flag=1
+                if ((r==0 or r==1 or r==2) and (c==0 or c==6)):
+                    w=13
+                else:
+                    w=12
                 if(index < word_len):
                     wrd = lambda x = [str(word_list[index].replace(".txt","")), index]: Map_wrd(x)
                     word_button = tkinter.Button(Func_frame,
                                         text = str(word_list[index].replace(".txt","")),
-                                        overrelief="solid",
-                                        height = 5,
-                                        width=8,
+                                        overrelief="solid", fg = fg_color,
+                                        height = 7,
+                                        width=w,
                                         bg=color_,
                                         command=wrd)
                     word_button.grid(row = r, column = c)
@@ -118,9 +159,9 @@ def word_sheet(root_data,root_sound,word_list,word_len,parent):
                     word_button = tkinter.Button(Func_frame,
                                         text = '',
                                         overrelief="solid",
-                                        height = 5,
+                                        height = 7,
                                         bg=color_,
-                                        width=8)
+                                        width=w)
                     word_button.grid(row = r, column = c)
         return index
     def Next(event):
@@ -139,7 +180,9 @@ def word_sheet(root_data,root_sound,word_list,word_len,parent):
             print("다음 페이지 출력하는데 지금은 막아두겠습니다.")
         else:
             voice_timmer("Last","마지막페이지",5)
-        long_click_flag = time.time()    
+        srv.clear_all(kit_list)
+        long_click_flag = time.time()
+        
     word_index = make_button(word_index)
      #------뒤로가기랑 초기 화면 다음페이지 으로 부분------
     def Close_top(event):
@@ -152,7 +195,7 @@ def word_sheet(root_data,root_sound,word_list,word_len,parent):
         if(time.time() - long_click_flag < 2):
             return
         voice_timmer("Move","이동완료",1)
-        clear_all(kit_list)
+        srv.clear_all(kit_list)
         Func_top.destroy()
         long_click_flag = time.time()
     def Initialize(event):
@@ -165,61 +208,58 @@ def word_sheet(root_data,root_sound,word_list,word_len,parent):
         if(time.time() - long_click_flag < 2):
             return
         long_click_flag = time.time()
-        clear_all(kit_list)
         voice_timmer("Move","이동완료",1)
+        srv.clear_all(kit_list)
         Func_top.destroy()
         parent.destroy()
             
             
     Func_top.bind("<F11>", Close_top_double)
-    frame_sel_exit = tkinter.Frame(Func_top, background = "tan")
-    frame_sel_exit.pack(side = "bottom", anchor = 'c',padx = 10, pady = 3,expand=True)
+    frame_sel_exit = tkinter.Frame(Func_top, background = "burlywood1")
+    frame_sel_exit.pack(side = "bottom", anchor = 'c',expand=True)
     button1 = tkinter.Button(frame_sel_exit, text="뒤로가기",command = Close_top_double,
                              repeatdelay=100,
                              repeatinterval=100,
-                             height = 3, width = 15,
-                             background = 'tan1')
+                             height = 3, width = 34,
+                             background = 'burlywood1')
     button1.bind("<Button-1>", Close_top)
     button1.grid(row = 0, column = 0)
 
     button2 = tkinter.Button(frame_sel_exit, text="초기 화면으로",command = Initialize_double,
                              repeatdelay=100,
                              repeatinterval=100,
-                             height = 3, width = 15,
-                             background = 'tan1')
+                             height = 3, width = 34,
+                             background = 'burlywood1')
     button2.bind("<Button-1>", Initialize)
     button2.grid(row = 0, column = 1)
 
     button3 = tkinter.Button(frame_sel_exit, text="다음 페이지",command = Next_double,
                              repeatdelay=100,
                              repeatinterval=100,
-                             height = 3, width = 15,
-                             background = 'tan1')
+                             height = 3, width = 34,
+                             background = 'burlywood1')
     button3.bind("<Button-1>", Next)
     button3.grid(row = 0, column = 2)
    
 
-def Mapping(i):
-    #global double_key_flag
-    #if(double_key_flag):  
+def Mapping(i):  
     global text_pw, Shift_flag
     if(i == 46):
         if(Shift_flag == 0):
             Shift_flag = 1
         else:
             Shift_flag = 0
+        return
     elif(i == 47):
-        text_pw.delete(len(text_pw.get())-1,tkinter.END)
-        Shift_flag = 0
+        pyautogui.press('backspace')
     elif(i == 45):
-        text_pw.insert(tkinter.END," ")
-        Shift_flag = 0
+        pyautogui.press('space')
     else:
         if(Shift_flag == 0):
-            text_pw.insert(tkinter.END,little_array[i])
+            pyautogui.typewrite(little_array[i])
         if(Shift_flag == 1):
-            text_pw.insert(tkinter.END,big_array[i])
-            Shift_flag = 0
+            pyautogui.typewrite(big_array[i])
+    Shift_flag = 0
 
 def keyboard_double(event):
     global double_key_flag
@@ -230,6 +270,10 @@ def Make_button(Frame):
     temp_col = 0
     for i in range(0,48):
         key_func = lambda x = i : Mapping(x)
+        if little_array[i] in ['`','q','Erase','Space','Shift','=',']','-']:
+            ssize=8
+        else:
+            ssize=5
         #Use lambda to mapping each button
         if(little_array[i] == 'q' or little_array[i] == 'a' or little_array[i] == 'z'):
             temp_row +=1
@@ -239,20 +283,24 @@ def Make_button(Frame):
                 temp_col = 0
         if(little_array[i] == 'Space'):
             temp = tkinter.Button(Frame,text = 'Space', overrelief="solid",command = key_func,
-                                  bg = 'burlywood1', width=3,repeatdelay=400, repeatinterval=80)
-            temp.grid(row=2,column = 11)
+                                  bg = 'burlywood1', width=ssize,height=2,repeatdelay=400, repeatinterval=80)
+            temp.grid(row=3,column = 0)
         elif(little_array[i] == 'Shift'):
             temp = tkinter.Button(Frame,text = 'Shift', overrelief="solid",command = key_func,
-                                  bg = 'burlywood1', width=3,repeatdelay=400, repeatinterval=80)
+                                  bg = 'burlywood1', width=ssize,height=2,repeatdelay=400, repeatinterval=80)
             temp.grid(row=3,column = 11)
         elif(little_array[i] == 'Erase'):
             temp = tkinter.Button(Frame,text = 'Erase', overrelief="solid",command = key_func,
-                                  bg = 'burlywood1',width=3,repeatdelay=400, repeatinterval=80)
-            temp.grid(row=1,column = 12)
+                                  bg = 'burlywood1',width=ssize,height=2,repeatdelay=400, repeatinterval=80)
+            temp.grid(row=2,column = 0)
         else:
             temp = tkinter.Button(Frame,text = little_array[i] + '( '+ big_array[i] +' )',
-                                  bg = 'burlywood1', overrelief="solid",command = key_func, width=3,repeatdelay=400, repeatinterval=80)
-            temp.grid(row=temp_row,column = temp_col)
+                                  bg = 'burlywood1', overrelief="solid",command = key_func, width=ssize,height=2,
+                                  repeatdelay=400, repeatinterval=80)
+            if(temp_row == 0 and temp_col == 12):
+                temp.grid(row=2,column = 11)
+            else:
+                temp.grid(row=temp_row,column = temp_col)
             temp_col += 1
         temp.bind("<Double-Button-1>", keyboard_double)
         
@@ -279,23 +327,52 @@ def voice_timmer_root(root, key, sound, minute):
 def Connect_wifi(event):
     global long_click_flag
     long_click_flag = time.time()
-    print("와이파이연결 음성 출력")
-    voice_timmer("Wifi","wifi_toplevel",5)
+    voice_timmer("Wifi","설정",2)
             
 def Connect_wifi_double():
-    global line, text_pw, long_click_flag, text_ssid
+    global line, text_pw, long_click_flag, text_ssid, text_ip, wifi_flag, Wifi_list, first_flag
     if(time.time() - long_click_flag < 2):
         return
+    #음성출력때문에 알고리즘이 밀리는것을 방지하는 flag
+    #아래는 관리자인지 확인하는 음성인식 부분 코드이지만 데모때는 생략.
+    '''
+    if wifi_flag == 0:
+        wifi_flag = 1
+        os.system(mp3_route+"보호자전용.mp3")
+        time.sleep(0.3)
+        os.system(mp3_route+"보호자전용1.mp3")
+        time.sleep(0.3)
+        os.system(mp3_route+"보호자전용2.mp3")
+        
+        with sr.Microphone() as source:
+            audio = r.listen(source)
+        wifi_flag=0
+        try:
+            string = r.recognize_google(audio,language='ko_KO')
+            string=string.replace(" ","")
+            print(string)
+            if "관리자" in string:
+                os.system(mp3_route+"보호자전용3.mp3")
+            else:
+                os.system(mp3_route+"보호자전용4.mp3")
+                return
+        except:
+            os.system(mp3_route+"보호자전용4.mp3")
+            wifi_flag=0
+            return
+    else:
+        return
+        '''
     Wifi_list = []
-    voice_timmer("Move","이동완료",1) 
-    print("이동 음성 출력")
+    os.system(mp3_route+"보호자전용3.mp3")
+    #voice_timmer("Move","이동완료",2)
+    f=open('/home/pi/dip/setting/setip.txt','r')
+    ip=f.read()
+    f.close()
     long_click_flag = time.time()
-    wi = tkinter.Toplevel(bg = 'tan', cursor='none')
+    wi = tkinter.Toplevel(bg = '#222b3f', cursor='none')
     wi.geometry("800x480")
     wi.attributes("-fullscreen", True)
-
-    def scroll_voice():
-        voice_timmer("Scroll","스크롤",5)
     
     def Close(event=None):
         global long_click_flag
@@ -314,10 +391,10 @@ def Connect_wifi_double():
 
     def Connect_double():
         global text_pw, text_ssid
-        voice_timmer("Connecnt_try","접속시도",2)
-        
+        #voice_timmer("Connecnt_try","접속시도",2)
         if(text_ssid.get() == ''):
-            voice_timmer("Connecnt_warnning","접속실패",2)
+            #voice_timmer("Connecnt_warnning","접속실패",2)
+            mb.showinfo('warning','WiFi_ID를 확인해주세요',parent=wi)
         else:
             flag = 0
             
@@ -331,61 +408,175 @@ def Connect_wifi_double():
                             os.system('sed \'s/ENTER_PW/%s/\' /home/pi/dip/wifi_setting/wpa_supplicant_id.conf > /home/pi/dip/wifi_setting/wpa_supplicant_pw.conf' %text_pw.get())
                             os.system('sudo cp -p /home/pi/dip/wifi_setting/wpa_supplicant_pw.conf /etc/wpa_supplicant/wpa_supplicant.conf')
                         else:
+                            os.system('sudo chmod 777 /etc/wpa_supplicant/wpa_supplicant.conf')
+                            os.system('sudo chmod 777 /etc/wpa_supplicant/wpa_supplicant_temp.conf')
+                            os.system('sudo cp /etc/wpa_supplicant/wpa_supplicant_temp.conf /etc/wpa_supplicant/wpa_supplicant.conf')
                             os.system('sudo wpa_passphrase %s %s>> /etc/wpa_supplicant/wpa_supplicant.conf' %(cell.ssid,text_pw.get()))
                     else:
                         os.system('sed \'s/ENTER_ID/%s/\' /home/pi/dip/wifi_setting/wpa_supplicant_only_id.conf > /etc/wpa_supplicant/wpa_supplicant.conf' %text_ssid.get())
                     break
             
-            voice_timmer("Connecnt_good","접속성공",2)
+            #voice_timmer("Connecnt_good","접속성공",2)
+            mb.showinfo('complete','재부팅 후 적용됩니다.',parent=wi)
             wi.destroy()
-   
-    
-
+            
+    def Set_ip():
+        dm.set_ip(text_ip.get())
+        #voice_timmer("Setip","변경",2)
+        mb.showinfo('complete','적용 완료',parent=wi)
         
         
         
     wi.bind("<F11>", Close_double)
-    #------------------------------------top--------------------------------
-    frame_top = tkinter.Frame(wi,bg = 'tan')
 
-    frame_back=tkinter.Frame(frame_top,bg = 'burlywood1')#back,id,pw input
-    back = tkinter.Button(frame_back,text = "뒤로가기", overrelief="solid", height = 1,width=8,
-                          repeatdelay=100,bg = 'burlywood1',
-                          repeatinterval=100,command=Close_double)
-    back.bind("<Button-1>", Close)
-    back.pack()
 
-    frame_back.grid(row=0,column=0)#grid
+    #-----------------------------------------------------------------------
+    top_grid_frame=tkinter.Frame(wi,bg = '#222b3f')
+    frame_top = tkinter.Frame(top_grid_frame,bg = '#222b3f')
+    
+    
+    
+    frame_up_scale = tkinter.Frame(frame_top,bg = '#222b3f')
 
-    frame_idpw=tkinter.Frame(frame_top,bg = 'tan')
-    frame_id=tkinter.Frame(frame_idpw,bg = 'tan')
-    label_ssid = tkinter.Label(frame_id, text="WiFi_ID : ",width = 10, anchor='e',bg = 'tan')
+    frame_idpw=tkinter.Frame(frame_up_scale,bg = '#222b3f')
+    frame_ip=tkinter.Frame(frame_idpw,bg = '#222b3f')
+    label_ip = tkinter.Label(frame_ip, text="IP : ",width = 10, anchor='e',bg = '#222b3f',fg='tan')
+    label_ip.pack(side ="left")
+    text_ip = tkinter.Entry(frame_ip,width = 30)
+    text_ip.insert(tkinter.END,ip)
+    text_ip.pack(side = "right")
+    frame_ip.pack(pady=7)
+    
+    frame_id=tkinter.Frame(frame_idpw,bg = '#222b3f')
+    label_ssid = tkinter.Label(frame_id, text="WiFi_ID : ",width = 10, anchor='e',bg = '#222b3f',fg='tan')
     label_ssid.pack(side ="left")
     text_ssid = tkinter.Entry(frame_id,width = 30)
     text_ssid.pack(side = "right")
     frame_id.pack()
         
-    frame_pw=tkinter.Frame(frame_idpw,bg = 'tan')
-    label_pw = tkinter.Label(frame_pw, text="Password : ",width = 10, anchor='e',bg = 'tan')
+    frame_pw=tkinter.Frame(frame_idpw,bg = '#222b3f')
+    label_pw = tkinter.Label(frame_pw, text="Password : ",width = 10, anchor='e',bg = '#222b3f',fg='tan')
     label_pw.pack(side ="left")
     text_pw = tkinter.Entry(frame_pw,width = 30)
     text_pw.pack(side = "right")
     frame_pw.pack()
-    frame_idpw.grid(row=0,column=1)#grid
+    frame_idpw.grid(row=0,column=0)
+    
 
-    frame_button = tkinter.Frame(frame_top,bg = 'tan')
-    button_connect = tkinter.Button(frame_button, text = "접속", overrelief="solid", height = 1,width=8,
+    frame_button = tkinter.Frame(frame_up_scale,bg = '#222b3f')
+    
+    button_connect = tkinter.Button(frame_button, text = "변경", overrelief="solid", height = 1,width=8,
+                                    bg = 'burlywood1',command=Set_ip)
+    button_connect.pack(pady=4)
+    
+    button_connect = tkinter.Button(frame_button, text = "접속", overrelief="solid", height = 2,width=8,
                                     bg = 'burlywood1',command=Connect_double)
     button_connect.pack()
     
-    frame_button.grid(row=0,column=2)#grid
+    frame_button.grid(row=0,column=1)
+    frame_up_scale.pack()
+
+    ################################### volume ###################################
+    scale_val=tkinter.IntVar()
+    volume_val = [0,65,70,75,80,84,88,90,92,94,96,98,99,100]
+    def volume_check(self):
+        os.system('sudo amixer cset numid=1 {0}%'.format(volume_val[int(scale_val.get())]))
+        #print('sudo amixer cset numid=1 {0}%'.format(volume_val[int(scale_val.get())]))
+
+    first_flag = 1
+    def Set_vol():
+        global first_flag
+        x = wi.winfo_x()
+        y = wi.winfo_y()
+        wi_vol = tkinter.Toplevel(master=wi,bg = 'tan', cursor='none',relief='ridge',padx=2,pady=2,bd=5)
+        wi_vol.title('Volume')
+        scale=tkinter.Scale(wi_vol,variable=scale_val,command=volume_check, orient="horizontal",
+                        showvalue=False, to=13, length=250, bg='burlywood1', relief = 'ridge',
+                        troughcolor = 'tan')
+        scale.pack()
+        wi_vol.geometry("+%d+%d" % (x + 200, y + 150))
+        if first_flag:
+            first_flag = 0
+            scale.set(6)
+        
+    volume_button=tkinter.Button(wi, text = "음량조절", overrelief="solid",
+                                   height = 1,width=8, command=Set_vol,
+                                   bg = 'burlywood1')
+    volume_button.place(x=400,y=176)
+    ##########################################################
+
+    ######################################## word delete ##################################
+
+    def Del_word():
+        global first_flag, word_manual_list
+        wi_del = tkinter.Toplevel(master=wi,bg = 'tan', cursor='none',relief='ridge',padx=2,pady=2,bd=5)
+        wi_del.title('Delete')
+        
+        frame_del = tkinter.Frame(wi_del,bg = 'tan')
+        word_scrollbar = tkinter.Scrollbar(frame_del,bg = 'tan')
+        word_scrollbar.pack(side="right", fill="y")
+        word_listbox=tkinter.Listbox(frame_del, yscrollcommand = scrollbar.set,height=7)
+        word_listbox.pack(side="left")
+        word_scrollbar["command"]=word_listbox.yview
+
+        line = 1
+        word_manual_list = Smart_File.Find_dir_format(Manual_route_data,".txt")
+        for name in word_manual_list:
+           word_listbox.insert(line, name.replace('.txt',''))
+           line = line + 1
+        frame_del.pack()
+
+        def do_del():
+            global word_manual_list, word_manual_len, line
+            try:
+                item = word_listbox.curselection()
+                index = item[0]
+                os.system('sudo rm '+ Manual_route_data + word_manual_list[index])
+                os.system('sudo rm '+ Manual_route_voice + word_manual_list[index].replace('txt','mp3'))
+                
+                word_manual_list = Smart_File.Find_dir_format(Manual_route_data,".txt")
+                word_manual_len = len(word_manual_list)
+                for i in range(1,line+1):
+                    word_listbox.delete(0)
+                
+                line = 1
+                for name in word_manual_list:
+                   word_listbox.insert(line, name)
+                   line = line + 1
+                
+            except:
+                mb.showinfo('error','단어를 선택해주세요.',parent=wi)
+            
+            
+            
+        del_button = tkinter.Button(wi_del, text = "삭제", overrelief="solid",
+                                   height = 1,width=18, command=do_del,
+                                   bg = 'burlywood1')
+        del_button.pack()
+        
+        wi_del.geometry("+%d+%d" % (300,150))
+
+    delete_button=tkinter.Button(wi, text = "단어삭제", overrelief="solid",
+                                   height = 1,width=8, command=Del_word,
+                                   bg = 'burlywood1')
+    delete_button.place(x=485,y=176)
+
+    #########################################################################################
+    #------------------------------ back button --------------------------------
+    back = tkinter.Button(wi,text = "뒤로가기", overrelief="solid", height = 3,width=200,
+                          repeatdelay=100,bg = 'burlywood1',
+                          repeatinterval=100,command=Close_double)
+    back.bind("<Button-1>", Close)
+    back.pack(side = "bottom")
+
+    frame_keyboard=tkinter.Frame(wi, bg = 'tan')#keyboard
+    Make_button(frame_keyboard)
+    frame_keyboard.pack(side = "bottom")
+    frame_top.pack(side = "right")
     
-    frame_top.pack(side = "top",expand=1)
-    #-----------------------------------------------------------------------
-   
-    #----------------------------------left---------------------------------
-    frame_left = tkinter.Frame(wi,bg = 'tan')
-    frame_wifi = tkinter.Frame(frame_left,bg = 'tan')#wifi list
+    #----------------------------------wifi list---------------------------------
+    frame_left = tkinter.Frame(top_grid_frame,bg = '#222b3f')
+    frame_wifi = tkinter.Frame(frame_left,bg = '#222b3f')#wifi list
         
     def Ins_double():
         try:
@@ -393,34 +584,36 @@ def Connect_wifi_double():
             index = item[0]
             text_ssid.delete(0,30)
             text_ssid.insert(0,Wifi_list[index])
+        
         except:
-            voice_timmer("Miss","선택실패",5)
+            #voice_timmer("Miss","선택실패",5)
+            mb.showinfo('error','와이파이를 선택해주세요.',parent=wi)
+        
         
     def Search():
-        time.sleep(1)
-        wifilist = []
+        global Wifi_list
+        Wifi_list = []
         cells = wifi.Cell.all('wlan0')
        
         for cell in cells:
-            wifilist.append(cell.ssid)
-        return wifilist
+            Wifi_list.append(cell.ssid)
+
     
-    scrollbar = tkinter.Scrollbar(frame_wifi, command = scroll_voice,bg = 'tan')#보류
+    scrollbar = tkinter.Scrollbar(frame_wifi,bg = '#222b3f')
     scrollbar.pack(side="right", fill="y")
-    listbox=tkinter.Listbox(frame_wifi, yscrollcommand = scrollbar.set)
+    listbox=tkinter.Listbox(frame_wifi, yscrollcommand = scrollbar.set,height=7)
     line = 1
-    Wifi_list = Search()
     
     for name in Wifi_list:
        listbox.insert(line, name)
        line = line + 1
 
     def Retry_double():
-        global line
+        global line, Wifi_list
         for i in range(1,line+1):
             listbox.delete(0)
         
-        Wifi_list = Search()
+        Search()
         line = 1
         for name in Wifi_list:
            listbox.insert(line, name)
@@ -438,30 +631,25 @@ def Connect_wifi_double():
                                    bg = 'burlywood1')
     button_select.pack(side="left")
 
-    button_retry = tkinter.Button(frame_id_insert, text = "다시검색", overrelief="solid",
+    button_retry = tkinter.Button(frame_id_insert, text = "검색", overrelief="solid",
                                   height = 1,width=8, command=Retry_double,
                                   bg = 'burlywood1')
     button_retry.pack(side="right") 
     
     frame_id_insert.pack()
     frame_under_list.grid(row = 1, column = 0)#grid
-    frame_left.pack(side = "left",expand=1)
+    frame_left.pack(side = "left")
     #-----------------------------------------------------------------------
-
-    #---------------------------------right---------------------------------
-    frame_keyboard=tkinter.Frame(wi, bg = 'tan')#keyboard
-    Make_button(frame_keyboard)
-    frame_keyboard.pack(side = "right",expand=1)
-    #-----------------------------------------------------------------------
+    top_grid_frame.pack(pady=40) #맨위에 여백
 
 def Word_education(event):
     global long_click_flag
     long_click_flag = time.time()
-    voice_timmer("Word","단어학습",5)
+    voice_timmer("Word","단어학습",2)
     
 def Word_education_double():
-    global long_click_flag
-    if(time.time() - long_click_flag < 3):
+    global long_click_flag, font_1
+    if(time.time() - long_click_flag < 2.5):
         return
     voice_timmer("Move","이동완료",1) 
     long_click_flag = time.time()
@@ -553,87 +741,56 @@ def Word_education_double():
     Jamo.bind("<F11>", Close_double)
     #---------탈것 음식 장소 사용자지정-----------------
     frame_edu = tkinter.Frame(Jamo, background = "tan")
-    frame_edu.pack(side = "top", anchor = 'c',padx = 3, pady = 3,expand=True)
+    frame_edu.pack(side = "top", anchor = 'c',expand=True)
+    
     button1 = tkinter.Button(frame_edu, text="교통수단",command = Traffic_double,
-                             repeatdelay=100,
-                             repeatinterval=100,
-                             relief = 'solid',
-                             height = 16, width = 18,
-                             background = 'burlywood1')
+                             repeatdelay=100, highlightbackground = '#c8a780',
+                             repeatinterval=100, fg = '#c8a780', highlightthickness=1,
+                             height = 22, width = 25, highlightcolor='#222b3f',activebackground='#222b3f',
+                             relief = 'solid',activeforeground='#c8a780',font = font_1,
+                             background = '#222b3f')
     button1.bind("<Button-1>", Traffic)
     button1.grid(row = 0, column = 0)
 
     button2 = tkinter.Button(frame_edu, text="음식",command = Food_double,
-                             repeatdelay=100,
-                             repeatinterval=100,
-                             relief = 'solid',
-                             height = 16, width = 18,
-                             background = 'tan1')
+                             repeatdelay=100, highlightbackground = '#c8a780',
+                             repeatinterval=100, fg = '#222b3f', highlightthickness=1,
+                             height = 22, width = 24, highlightcolor='#222b3f',activebackground='burlywood1',
+                             relief = 'solid',activeforeground='#222b3f',font = font_1,
+                             background = 'burlywood1')
     button2.bind("<Button-1>", Food)
     button2.grid(row = 0, column = 1)
 
     button3 = tkinter.Button(frame_edu, text="장소",command = Location_double,
-                             repeatdelay=100,
-                             repeatinterval=100,
-                             relief = 'solid',
-                             height = 16, width = 18,
-                             background = 'burlywood1')
+                             repeatdelay=100, highlightbackground = '#c8a780',
+                             repeatinterval=100, fg = '#c8a780', highlightthickness=1,
+                             height = 22, width = 24, highlightcolor='#222b3f',activebackground='#222b3f',
+                             relief = 'solid',activeforeground='#c8a780',font = font_1,
+                             background = '#222b3f')
     button3.bind("<Button-1>", Location)
     button3.grid(row = 0, column = 2)
 
     button4 = tkinter.Button(frame_edu, text="사용자 지정",command = User_word_double,
-                             repeatdelay=100,
-                             repeatinterval=100,
-                             relief = 'solid',
-                             height = 16, width = 18,
-                             background = 'tan1')
+                             repeatdelay=100, highlightbackground = '#c8a780',
+                             repeatinterval=100, fg = '#222b3f', highlightthickness=1,
+                             height = 22, width = 25, highlightcolor='#222b3f',activebackground='burlywood1',
+                             relief = 'solid',activeforeground='#222b3f',font = font_1,
+                             background = 'burlywood1')
     button4.bind("<Button-1>", User_word)
     button4.grid(row = 0, column = 3)
 
-    #뒤로가기 버튼
-    
-    frame_sel_exit = tkinter.Frame(Jamo, background = "tan")
-    frame_sel_exit.pack(side = "bottom", anchor = 'c',padx = 10, pady = 3)
+    #뒤로가기 버튼    
+    frame_sel_exit = tkinter.Frame(Jamo, background = "burlywood1")
+    frame_sel_exit.pack(side = "bottom", anchor = 'c')
     button5 = tkinter.Button(frame_sel_exit, text="뒤로가기",command = Close_double,
-                             repeatdelay=100,
-                             repeatinterval=100,
-                             relief = 'solid',
-                             height = 3, width = 20,
-                             background = 'tan3')
+                             repeatdelay=100, highlightbackground = '#ffffff',
+                             repeatinterval=100, fg = '#222b3f', highlightthickness=1,
+                             height = 5, width = 215, highlightcolor='#ffffff',activebackground='#ffffff',
+                             relief = 'solid',activeforeground='#222b3f',font = font_1,
+                             background = '#ffffff')
     button5.bind("<Button-1>", Close)
     button5.pack()
         
-
-    
-def Update():
-    voice_timmer("Update","업데이트",5)
-
-def Update_double(event):
-    #os.system("mpg321 ./sound/데모.mp3")
-    try:
-        A = fff+123
-        #일부러 안되는 코드 집어넣음, 인터넷이 연결안되거나 서버가 연결 됐을때만 실행되는부분
-    except:
-        voice_timmer("warning","서버경고",7)
-        #pass
-    '''
-    Up = tkinter.Toplevel()
-    def Check():
-        pass      
-    def Check_double(event):
-        Up.destroy()
-    Up.title("오류")
-    Up.geometry("400x240+200+120")
-    frame_la = tkinter.Frame(Up)
-    label=tkinter.Label(frame_la, text="서버가 닫혀있거나 와이파이가 연결되어있지 않습니다.")
-    label.grid(row = 0 , column = 0, pady="3m")
-    button_la=tkinter.Button(frame_la, text = "확인", overrelief="solid", height = 1,width=8, command=Check)
-    button_la.bind("<Double-Button-1>", Check_double)
-    button_la.grid(row = 1 , column = 0, pady="3m")
-    frame_la.pack(padx = "3m",pady="15m")
-    voice_timmer("warning","서버경고",7)
-    '''
-  
 def Free_study(event):
     global long_click_flag
     long_click_flag = time.time()
@@ -662,8 +819,8 @@ def Free_study_double():
         if(time.time() - long_click_flag < 2):
             return
         long_click_flag = time.time()
-        clear_all(kit_list)
-        voice_timmer("Move","이동완료",1) 
+        voice_timmer("Move","이동완료",1)
+        srv.clear_all(kit_list)
         free.destroy()
         
     free.bind("<F11>", Close_double)
@@ -687,8 +844,8 @@ def Free_study_double():
                 
         for i in range(0,72):
             d_list.append(int(num[i].get()))
-            print(num[i].get(), end='')
-        active(d_list,kit_list)
+            #print(num[i].get(), end='')
+        srv.active(d_list,kit_list)
           
     def Map_vos(x):
         global toggle_flag
@@ -713,7 +870,7 @@ def Free_study_double():
                                 padx = 1,
                                 pady = 1,
                                 command=vos,
-                                width = 4,
+                                width = 5,
                                 height = 3).grid(row = (r//2), column = c)
             index += 1    
         i += 1
@@ -787,30 +944,30 @@ def Free_study_double():
     
     ####################################################################
     frame_button = tkinter.Frame(free, background = "tan")
-    frame_button.pack(anchor = 'c',padx = 30, pady = 10,expand=True)
+    frame_button.pack(anchor = 'c',expand=True)
     #-------------------------------------------------------------------
     frame_button_r = tkinter.Button(frame_button,
                                     text = "뒤로가기",
                                     overrelief="solid",
-                                    height = 2,
-                                    width=10,
+                                    height = 4,
+                                    width=53,
                                     repeatdelay=100,
                                     repeatinterval=100,
                                     background = "burlywood1",
                                     command=Close_double)
-    frame_button_r.pack(side = "left",anchor = 'c',padx = 3, pady = 3,expand=True)
+    frame_button_r.pack(side = "left",anchor = 'c',expand=True)
     frame_button_r.bind("<Button-1>", Close)
     #-------------------------------------------------------------------
     frame_button_l = tkinter.Button(frame_button,
                                     text = "적용",
                                     overrelief="solid",
-                                    height = 2,
-                                    width=10,
+                                    height = 4,
+                                    width=53,
                                     command=Sel_double,
                                     repeatdelay=100,
                                     repeatinterval=100,
                                     background = "burlywood1")
-    frame_button_l.pack(side = "right",anchor = 'c',padx = 3, pady = 3,expand=True)
+    frame_button_l.pack(side = "right",anchor = 'c',expand=True)
     frame_button_l.bind("<Button-1>",Sel)
 
   
@@ -835,7 +992,7 @@ def jamo_edu_double():
     def Close(event=None):
         global long_click_flag
         long_click_flag = time.time()
-        voice_timmer("Close","back",3)
+        voice_timmer("Close","back",2)
     def Close_double(event = None):
         global long_click_flag
         if(time.time() - long_click_flag < 2):
@@ -844,6 +1001,111 @@ def jamo_edu_double():
         voice_timmer("Move","이동완료",1)
         Jamo.destroy()
     Jamo.bind("<F11>", Close_double)
+
+    def Simple_word_maker(simple_list, simple_var, parent,j):
+        global long_click_flag
+        if(time.time() - long_click_flag < 2):
+            return
+        long_click_flag = time.time()
+        voice_timmer("Move","이동완료",1) 
+        Sung = tkinter.Toplevel(background = "tan",cursor='none')
+        Sung.geometry("800x480")
+        Sung.attributes("-fullscreen", True)
+        Sung_frame = tkinter.Frame(Sung,background = "tan")
+        Sung_frame.pack(side = "top", anchor = 'c',expand=True)
+        sung_index = 0
+
+        def Map_act(x):
+            voice_timmer("Simple_"+str(x), simple_list[x], 1.7)
+            d_list = []
+            print(simple_var[x])
+            for i in simple_var[x]:
+                d_list.append(int(i))
+            [d_list.append(0) for i in range(72-len(d_list))]
+            #print(d_list) #확인
+            srv.active(d_list,kit_list)
+        if j == 0 or j == 2:
+            w=15
+            h=11
+        elif j == 1:
+            w=15
+            h=7
+        elif j == 3:
+            w=11
+            h=7
+        else:
+            w=37
+            h=11
+        for x in range(t_x[j]):
+            for y in range(t_y[j]):
+                if j == 3:
+                    if sung_index>26:
+                        break
+                act = lambda x = sung_index : Map_act(x)
+                if(sung_index%2):
+                    color_= 'tan1'
+                else:
+                    color_= 'burlywood1'
+                tkinter.Button(Sung_frame,text = simple_list[sung_index],
+                                bg = color_,
+                                padx = 1,
+                                pady = 1,
+                                height = h,
+                                width = w,
+                                command = act).grid(row = (x), column = y)
+                sung_index += 1
+                
+        #------뒤로가기랑 초기 화면으로 부분------
+        def Close_top(event):
+            global long_click_flag
+            long_click_flag = time.time()
+            voice_timmer("Close","back",3)
+            
+        def Close_top_double(event=None):
+            global long_click_flag
+            if(time.time() - long_click_flag < 2):
+                return
+            voice_timmer("Move","이동완료",1)
+            srv.clear_all(kit_list)
+            Sung.destroy()
+            long_click_flag = time.time()
+
+        def Initialize(event):
+            global long_click_flag
+            long_click_flag = time.time()
+            voice_timmer("Initial","초기화면",3)
+            
+        def Initialize_double():
+            global long_click_flag
+            if(time.time() - long_click_flag < 2):
+                return
+            long_click_flag = time.time()
+            voice_timmer("Move","이동완료",1)
+            srv.clear_all(kit_list)
+            Sung.destroy()
+            parent.destroy()
+            
+            
+        Sung.bind("<F11>", Close_top_double)
+
+        frame_sel_exit = tkinter.Frame(Sung, background = "tan")
+        frame_sel_exit.pack(side = "bottom", anchor = 'c')
+        button1 = tkinter.Button(frame_sel_exit, text="뒤로가기",command = Close_top_double,
+                                 repeatdelay=100,
+                                 repeatinterval=100,
+                                 height = 3, width = 55,
+                                 background = 'tan1')
+        button1.bind("<Button-1>", Close_top)
+        button1.pack(side = "left");
+
+        button2 = tkinter.Button(frame_sel_exit, text="초기 화면으로",command = Initialize_double,
+                                 repeatdelay=100,
+                                 repeatinterval=100,
+                                 height = 3, width = 55,
+                                 background = 'tan1')
+        button2.bind("<Button-1>", Initialize)
+        button2.pack(side = "right");
+        
     
     def Chosung(event):
         global long_click_flag
@@ -852,112 +1114,7 @@ def jamo_edu_double():
     
     #------초성 파트------
     def Chosung_double():
-        global long_click_flag
-        if(time.time() - long_click_flag < 2):
-            return
-        long_click_flag = time.time()
-        voice_timmer("Move","이동완료",1) 
-        Chosung = tkinter.Toplevel(background = "tan")
-        Chosung.geometry("800x480")
-        Chosung.attributes("-fullscreen", True)
-        cho_list = ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ','된소리']
-        cho_val = [[0,1,0,0,0,0],
-                   [1,1,0,0,0,0],
-                   [0,1,1,0,0,0],
-                   [0,0,0,1,0,0],
-                   [1,0,0,1,0,0],
-                   [0,1,0,1,0,0],
-                   [0,0,0,0,0,1],
-                   [0,1,0,0,0,1],
-                   [0,0,0,1,0,1],
-                   [1,1,1,0,0,0],
-                   [1,0,1,1,0,0],
-                   [1,1,0,1,0,0],
-                   [0,1,1,1,0,0],
-                   [0,0,0,0,0,1]]
-        
-        cho_frame = tkinter.Frame(Chosung,background = "red")
-        cho_frame.pack(side = "top", anchor = 'c',padx = 10, pady = 3,expand=True)
-        cho_index = 0
-
-        def Map_act(x):
-            voice_timmer("Cho_"+str(x), cho_list[x], 2)
-            d_list = []
-            for i in cho_val[x]:
-                d_list.append(int(i))
-            [d_list.append(0) for i in range(72-len(d_list))]
-            print(d_list) #확인
-            active(d_list,kit_list)
-        
-        for x in range(2):
-            for y in range(7):
-                act = lambda x = cho_index : Map_act(x)
-                if(cho_index%2):
-                    color_= 'tan1'
-                else:
-                    color_= 'burlywood1'
-                tkinter.Button(cho_frame,text = cho_list[cho_index],
-                                bg = color_,
-                                padx = 1,
-                                pady = 1,
-                                height = 7,
-                                width = 10,
-                                command = act).grid(row = (x), column = y)
-                cho_index += 1
-                
-
-        #------뒤로가기랑 초기 화면으로 부분------
-        def Close_top(event):
-            global long_click_flag
-            long_click_flag = time.time()
-            voice_timmer("Close","back",3)
-            
-        def Close_top_double(event=None):
-            global long_click_flag
-            if(time.time() - long_click_flag < 2):
-                return
-            clear_all(kit_list)
-            voice_timmer("Move","이동완료",1) 
-            Chosung.destroy()
-            long_click_flag = time.time()
-
-        def Initialize(event):
-            global long_click_flag
-            long_click_flag = time.time()
-            voice_timmer("Initial","초기화면",3)
-            
-        def Initialize_double():
-            global long_click_flag
-            if(time.time() - long_click_flag < 2):
-                return
-            long_click_flag = time.time()
-            clear_all(kit_list)
-            voice_timmer("Move","이동완료",1)
-            Chosung.destroy()
-            Jamo.destroy()
-            
-            
-        Chosung.bind("<F11>", Close_top_double)
-
-        frame_sel_exit = tkinter.Frame(Chosung, background = "tan")
-        frame_sel_exit.pack(side = "bottom", anchor = 'c',padx = 10, pady = 3)
-        button1 = tkinter.Button(frame_sel_exit, text="뒤로가기",command = Close_top_double,
-                                 repeatdelay=100,
-                                 repeatinterval=100,
-                                 height = 3, width = 15,
-                                 background = 'tan1')
-        button1.bind("<Button-1>", Close_top)
-        button1.pack(side = "left");
-
-        button2 = tkinter.Button(frame_sel_exit, text="초기 화면으로",command = Initialize_double,
-                                 repeatdelay=100,
-                                 repeatinterval=100,
-                                 height = 3, width = 15,
-                                 background = 'tan1')
-        button2.bind("<Button-1>", Initialize)
-        button2.pack(side = "right");
-
-        
+        Simple_word_maker(simple_k_list[0],simple_d_list[0],Jamo,0)
 
     def Moum(event):
         global long_click_flag
@@ -966,121 +1123,7 @@ def jamo_edu_double():
         
     #------모음 파트------
     def Moum_double():
-        global long_click_flag
-        if(time.time() - long_click_flag < 2):
-            return
-        long_click_flag = time.time()
-        voice_timmer("Move","이동완료",1) 
-        Chosung = tkinter.Toplevel(background = "tan")
-        Chosung.geometry("800x480")
-        Chosung.attributes("-fullscreen", True)
-        cho_list = ['ㅏ','ㅑ','ㅓ','ㅕ','ㅗ','ㅛ','ㅜ','ㅠ','ㅡ','ㅣ','ㅐ','ㅔ','ㅚ','ㅘ',
-                    'ㅝ','ㅢ','ㅖ','ㅟ','ㅒ','ㅙ','ㅞ']
-        cho_val = [[1,0,1,0,0,1],
-                   [0,1,0,1,1,0],
-                   [0,1,1,0,1,0],
-                   [1,0,0,1,0,1],
-                   [1,0,0,0,1,1],
-                   [0,1,0,1,0,0],
-                   [0,1,0,0,1,1],
-                   [1,1,0,0,1,0],
-                   [1,1,0,0,0,1],
-                   [0,1,1,0,0,1],
-                   [1,0,0,1,1,0],
-                   [1,0,1,1,1,0],
-                   [1,1,0,1,1,0],
-                   [1,1,0,1,1,1],
-                   [1,0,1,0,1,1],
-                   [1,1,1,0,1,0],
-                   [0,1,1,1,0,1],
-                   [0,1,0,0,1,0],
-                   [1,1,0,0,1,0,1,0,1,1,1,0],
-                   [0,1,0,1,1,0,1,0,1,1,1,0],
-                   [1,0,1,0,1,1,1,0,1,1,1,0],
-                   [1,1,1,0,1,0,1,0,1,1,1,0]]
-        
-        cho_frame = tkinter.Frame(Chosung,background = "red")
-        cho_frame.pack(side = "top", anchor = 'c',padx = 10, pady = 3,expand=True)
-        cho_index = 0
-
-        def Map_act(x):
-            voice_timmer("Cho_"+str(x), cho_list[x], 2)
-            d_list = []
-            for i in cho_val[x]:
-                d_list.append(int(i))
-            [d_list.append(0) for i in range(72-len(d_list))]
-            print(d_list) #확인
-            active(d_list,kit_list)
-            print(cho_val[x])
-        
-        for x in range(3):
-            for y in range(7):
-                act = lambda x = cho_index : Map_act(x)
-                if(cho_index%2):
-                    color_= 'tan1'
-                else:
-                    color_= 'burlywood1'
-                tkinter.Button(cho_frame,text = cho_list[cho_index],
-                                bg = color_,
-                                padx = 1,
-                                pady = 1,
-                                height = 5,
-                                width = 10,
-                                command = act).grid(row = (x), column = y)
-                cho_index += 1
-                
-
-        #------뒤로가기랑 초기 화면으로 부분------
-        def Close_top(event):
-            global long_click_flag
-            long_click_flag = time.time()
-            voice_timmer("Close","back",3)
-            
-        def Close_top_double(event=None):
-            global long_click_flag
-            if(time.time() - long_click_flag < 2):
-                return
-            clear_all(kit_list)
-            voice_timmer("Move","이동완료",1) 
-            Chosung.destroy()
-            long_click_flag = time.time()
-
-        def Initialize(event):
-            global long_click_flag
-            long_click_flag = time.time()
-            voice_timmer("Initial","초기화면",3)
-            
-        def Initialize_double():
-            global long_click_flag
-            if(time.time() - long_click_flag < 2):
-                return
-            long_click_flag = time.time()
-            clear_all(kit_list)
-            voice_timmer("Move","이동완료",1)
-            Chosung.destroy()
-            Jamo.destroy()
-            
-            
-        Chosung.bind("<F11>", Close_top_double)
-
-        frame_sel_exit = tkinter.Frame(Chosung, background = "tan")
-        frame_sel_exit.pack(side = "bottom", anchor = 'c',padx = 10, pady = 3)
-        button1 = tkinter.Button(frame_sel_exit, text="뒤로가기",command = Close_top_double,
-                                 repeatdelay=100,
-                                 repeatinterval=100,
-                                 height = 3, width = 15,
-                                 background = 'tan1')
-        button1.bind("<Button-1>", Close_top)
-        button1.pack(side = "left")
-
-        button2 = tkinter.Button(frame_sel_exit, text="초기 화면으로",command = Initialize_double,
-                                 repeatdelay=100,
-                                 repeatinterval=100,
-                                 height = 3, width = 15,
-                                 background = 'tan1')
-        button2.bind("<Button-1>", Initialize)
-        button2.pack(side = "right")
-        
+        Simple_word_maker(simple_k_list[1],simple_d_list[1],Jamo,1)
     
     def jongsung(event):
         global long_click_flag
@@ -1088,111 +1131,7 @@ def jamo_edu_double():
         voice_timmer("Jong","종성",3)
         
     def jongsung_double():
-        global long_click_flag
-        if(time.time() - long_click_flag < 2):
-            return
-        long_click_flag = time.time()
-        voice_timmer("Move","이동완료",1) 
-        Chosung = tkinter.Toplevel(background = "tan")
-        Chosung.geometry("800x480")
-        Chosung.attributes("-fullscreen", True)
-        cho_list = ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ']
-        cho_val = [[1,0,0,0,0,0],
-                   [0,0,1,1,0,0],
-                   [0,0,0,1,1,0],
-                   [0,0,1,0,0,0],
-                   [0,0,1,0,0,1],
-                   [1,0,1,0,0,0],
-                   [0,0,0,0,1,0],
-                   [0,0,1,1,1,1],
-                   [1,0,0,0,1,0],
-                   [0,0,1,0,1,0],
-                   [0,0,1,1,1,0],
-                   [0,0,1,0,1,1],
-                   [0,0,1,1,0,0],
-                   [0,0,0,1,1,1]]
-        
-        cho_frame = tkinter.Frame(Chosung,background = "red")
-        cho_frame.pack(side = "top", anchor = 'c',padx = 10, pady = 3,expand=True)
-        cho_index = 0
-
-        def Map_act(x):
-            voice_timmer("Cho_"+str(x), cho_list[x], 2)
-            d_list = []
-            for i in cho_val[x]:
-                d_list.append(int(i))
-            [d_list.append(0) for i in range(72-len(d_list))]
-            print(d_list) #확인
-            active(d_list,kit_list)
-            print(cho_val[x])
-        
-        for x in range(2):
-            for y in range(7):
-                act = lambda x = cho_index : Map_act(x)
-                if(cho_index%2):
-                    color_= 'tan1'
-                else:
-                    color_= 'burlywood1'
-                tkinter.Button(cho_frame,text = cho_list[cho_index],
-                                bg = color_,
-                                padx = 1,
-                                pady = 1,
-                                height = 7,
-                                width = 10,
-                                command = act).grid(row = (x), column = y)
-                cho_index += 1
-                
-
-        #------뒤로가기랑 초기 화면으로 부분------
-        def Close_top(event):
-            global long_click_flag
-            long_click_flag = time.time()
-            voice_timmer("Close","back",3)
-            
-        def Close_top_double(event=None):
-            global long_click_flag
-            if(time.time() - long_click_flag < 2):
-                return
-            clear_all(kit_list)
-            voice_timmer("Move","이동완료",1) 
-            Chosung.destroy()
-            long_click_flag = time.time()
-
-        def Initialize(event):
-            global long_click_flag
-            long_click_flag = time.time()
-            voice_timmer("Initial","초기화면",3)
-            
-        def Initialize_double():
-            global long_click_flag
-            if(time.time() - long_click_flag < 2):
-                return
-            long_click_flag = time.time()
-            clear_all(kit_list)
-            voice_timmer("Move","이동완료",1)
-            Chosung.destroy()
-            Jamo.destroy()
-            
-            
-        Chosung.bind("<F11>", Close_top_double)
-
-        frame_sel_exit = tkinter.Frame(Chosung, background = "tan")
-        frame_sel_exit.pack(side = "bottom", anchor = 'c',padx = 10, pady = 3)
-        button1 = tkinter.Button(frame_sel_exit, text="뒤로가기",command = Close_top_double,
-                                 repeatdelay=100,
-                                 repeatinterval=100,
-                                 height = 3, width = 15,
-                                 background = 'tan1')
-        button1.bind("<Button-1>", Close_top)
-        button1.pack(side = "left");
-
-        button2 = tkinter.Button(frame_sel_exit, text="초기 화면으로",command = Initialize_double,
-                                 repeatdelay=100,
-                                 repeatinterval=100,
-                                 height = 3, width = 15,
-                                 background = 'tan1')
-        button2.bind("<Button-1>", Initialize)
-        button2.pack(side = "right")
+        Simple_word_maker(simple_k_list[2],simple_d_list[2],Jamo,2)
     
     def simple_h1(event):
         global long_click_flag
@@ -1200,127 +1139,7 @@ def jamo_edu_double():
         voice_timmer("Simple","1종약자",3)
 
     def simple_h1_double():
-        global long_click_flag
-        if(time.time() - long_click_flag < 2):
-            return
-        long_click_flag = time.time()
-        voice_timmer("Move","이동완료",1) 
-        Chosung = tkinter.Toplevel(background = "tan")
-        Chosung.geometry("800x480")
-        Chosung.attributes("-fullscreen", True)
-        cho_list = ['가','나','다','마','바','사','자','카','타','파','하','것','ㅆ',
-                    '억','언','얼','연','열','영','옥','온','옹','운','울','은','을','인']
-        cho_val = [[1,1,1,0,0,1],
-                   [1,1,0,0,0,0],
-                   [0,1,1,0,0,0],
-                   [1,0,0,1,0,0],
-                   [0,1,0,1,0,0],
-                   [1,0,1,0,1,0],
-                   [0,1,0,0,0,1],
-                   [1,1,1,0,0,0],
-                   [1,0,1,1,0,0],
-                   [1,1,0,1,0,0],
-                   [0,1,1,1,0,0],
-                   [0,1,0,1,0,1,0,1,1,0,1,0],
-                   [0,1,0,0,1,0],
-                   [1,1,0,1,0,1],
-                   [0,1,1,1,1,1],
-                   [0,1,1,1,1,0],
-                   [1,0,0,0,0,1],
-                   [1,0,1,1,0,1],
-                   [1,1,1,1,0,1],
-                   [1,1,0,0,1,1],
-                   [1,0,1,1,1,1],
-                   [1,1,1,1,1,1],
-                   [1,1,1,1,0,0],
-                   [1,1,1,0,1,1],
-                   [1,0,0,1,1,1],
-                   [0,1,1,0,1,1],
-                   [1,1,1,1,1,0]]
-        
-        cho_frame = tkinter.Frame(Chosung,background = "tan")
-        cho_frame.pack(side = "top", anchor = 'c',padx = 10, pady = 3,expand=True)
-        cho_index = 0
-
-        def Map_act(x):
-            voice_timmer("Cho_"+str(x), cho_list[x], 2)
-            d_list = []
-            for i in cho_val[x]:
-                d_list.append(int(i))
-            [d_list.append(0) for i in range(72-len(d_list))]
-            print(d_list) #확인
-            active(d_list,kit_list)
-            print(cho_val[x])
-        
-        for x in range(3):
-            for y in range(9):
-                if(cho_index>=26):
-                    break
-                act = lambda x = cho_index : Map_act(x)
-                if(cho_index%2):
-                    color_= 'tan1'
-                else:
-                    color_= 'burlywood1'
-                tkinter.Button(cho_frame,text = cho_list[cho_index],
-                                bg = color_,
-                                padx = 1,
-                                pady = 1,
-                                height = 7,
-                                width = 10,
-                                command = act).grid(row = (x), column = y)
-                cho_index += 1
-                
-
-        #------뒤로가기랑 초기 화면으로 부분------
-        def Close_top(event):
-            global long_click_flag
-            long_click_flag = time.time()
-            voice_timmer("Close","back",3)
-            
-        def Close_top_double(event=None):
-            global long_click_flag
-            if(time.time() - long_click_flag < 2):
-                return
-            clear_all(kit_list)
-            voice_timmer("Move","이동완료",1) 
-            Chosung.destroy()
-            long_click_flag = time.time()
-
-        def Initialize(event):
-            global long_click_flag
-            long_click_flag = time.time()
-            voice_timmer("Initial","초기화면",3)
-            
-        def Initialize_double():
-            global long_click_flag
-            if(time.time() - long_click_flag < 2):
-                return
-            clear_all(kit_list)
-            long_click_flag = time.time()
-            voice_timmer("Move","이동완료",1)
-            Chosung.destroy()
-            Jamo.destroy()
-            
-            
-        Chosung.bind("<F11>", Close_top_double)
-
-        frame_sel_exit = tkinter.Frame(Chosung, background = "tan")
-        frame_sel_exit.pack(side = "bottom", anchor = 'c',padx = 10, pady = 3)
-        button1 = tkinter.Button(frame_sel_exit, text="뒤로가기",command = Close_top_double,
-                                 repeatdelay=100,
-                                 repeatinterval=100,
-                                 height = 3, width = 15,
-                                 background = 'tan1')
-        button1.bind("<Button-1>", Close_top)
-        button1.pack(side = "left");
-
-        button2 = tkinter.Button(frame_sel_exit, text="초기 화면으로",command = Initialize_double,
-                                 repeatdelay=100,
-                                 repeatinterval=100,
-                                 height = 3, width = 15,
-                                 background = 'tan1')
-        button2.bind("<Button-1>", Initialize)
-        button2.pack(side = "right")
+        Simple_word_maker(simple_k_list[3],simple_d_list[3],Jamo,3)
     
     def simple_h2(event):
         global long_click_flag
@@ -1328,114 +1147,18 @@ def jamo_edu_double():
         voice_timmer("Simple","2종약자",3)
 
     def simple_h2_double():
-        global long_click_flag
-        if(time.time() - long_click_flag < 2):
-            return
-        long_click_flag = time.time()
-        voice_timmer("Move","이동완료",1) 
-        Chosung = tkinter.Toplevel(background = "tan")
-        Chosung.geometry("800x480")
-        Chosung.attributes("-fullscreen", True)
-        cho_list = ['그래서','그러나','그러면','그러므로','그런데','그리고']
-        cho_val = [[1,0,0,0,0,0,0,1,1,0,1,0],
-                   [1,0,0,0,0,0,1,1,0,0,0,0],
-                   [1,0,0,0,0,0,0,0,1,1,0,0],
-                   [1,0,0,0,0,0,0,0,1,0,0,1],
-                   [1,0,0,0,0,0,1,1,0,1,1,0],
-                   [1,0,0,0,0,0,1,0,0,0,1,1]]
-        
-        cho_frame = tkinter.Frame(Chosung,background = "tan")
-        cho_frame.pack(side = "top", anchor = 'c',padx = 10, pady = 3,expand=True)
-        cho_index = 0
-
-        def Map_act(x):
-            voice_timmer("Cho_"+str(x), cho_list[x], 2)
-            d_list = []
-            for i in cho_val[x]:
-                d_list.append(int(i))
-            [d_list.append(0) for i in range(72-len(d_list))]
-            print(d_list) #확인
-            active(d_list,kit_list)
-            print(cho_val[x])
-        
-        for x in range(2):
-            for y in range(3):
-                act = lambda x = cho_index : Map_act(x)
-                if(cho_index%2):
-                    color_= 'tan1'
-                else:
-                    color_= 'burlywood1'
-                tkinter.Button(cho_frame,text = cho_list[cho_index],
-                                bg = color_,
-                                padx = 1,
-                                pady = 1,
-                                height = 10,
-                                width = 15,
-                                command = act).grid(row = (x), column = y)
-                cho_index += 1
-                
-
-        #------뒤로가기랑 초기 화면으로 부분------
-        def Close_top(event):
-            global long_click_flag
-            long_click_flag = time.time()
-            voice_timmer("Close","back",3)
-            
-        def Close_top_double(event=None):
-            global long_click_flag
-            if(time.time() - long_click_flag < 2):
-                return
-            clear_all(kit_list)
-            voice_timmer("Move","이동완료",1) 
-            Chosung.destroy()
-            long_click_flag = time.time()
-
-        def Initialize(event):
-            global long_click_flag
-            long_click_flag = time.time()
-            voice_timmer("Initial","초기화면",3)
-            
-        def Initialize_double():
-            global long_click_flag
-            if(time.time() - long_click_flag < 2):
-                return
-            clear_all(kit_list)
-            long_click_flag = time.time()
-            voice_timmer("Move","이동완료",1)
-            Chosung.destroy()
-            Jamo.destroy()
-            
-            
-        Chosung.bind("<F11>", Close_top_double)
-
-        frame_sel_exit = tkinter.Frame(Chosung, background = "tan")
-        frame_sel_exit.pack(side = "bottom", anchor = 'c',padx = 10, pady = 3)
-        button1 = tkinter.Button(frame_sel_exit, text="뒤로가기",command = Close_top_double,
-                                 repeatdelay=100,
-                                 repeatinterval=100,
-                                 height = 3, width = 15,
-                                 background = 'tan1')
-        button1.bind("<Button-1>", Close_top)
-        button1.pack(side = "left");
-
-        button2 = tkinter.Button(frame_sel_exit, text="초기 화면으로",command = Initialize_double,
-                                 repeatdelay=100,
-                                 repeatinterval=100,
-                                 height = 3, width = 15,
-                                 background = 'tan1')
-        button2.bind("<Button-1>", Initialize)
-        button2.pack(side = "right")
+        Simple_word_maker(simple_k_list[4],simple_d_list[4],Jamo,4)
         
         
     Jamo.bind("<F11>", Close_double)
     #---------초성 모음 종성 약자 -----------------
     frame_edu = tkinter.Frame(Jamo, background = "tan")
-    frame_edu.pack(side = "top", anchor = 'c',padx = 3, pady = 3,expand=True)
+    frame_edu.pack(side = "top", anchor = 'c',expand=True)
     button1 = tkinter.Button(frame_edu, text="초성",command = Chosung_double,
                              repeatdelay=100,
                              repeatinterval=100,
                              relief = 'solid',
-                             height = 16, width = 18,
+                             height = 22, width = 19,
                              background = 'burlywood1')
     button1.bind("<Button-1>", Chosung)
     button1.grid(row = 0, column = 0)
@@ -1444,7 +1167,7 @@ def jamo_edu_double():
                              repeatdelay=100,
                              repeatinterval=100,
                              relief = 'solid',
-                             height = 16, width = 18,
+                             height = 22, width = 19,
                              background = 'tan1')
     button2.bind("<Button-1>", Moum)
     button2.grid(row = 0, column = 1)
@@ -1453,7 +1176,7 @@ def jamo_edu_double():
                              repeatdelay=100,
                              repeatinterval=100,
                              relief = 'solid',
-                             height = 16, width = 18,
+                             height = 22, width = 19,
                              background = 'burlywood1')
     button3.bind("<Button-1>", jongsung)
     button3.grid(row = 0, column = 2)
@@ -1462,7 +1185,7 @@ def jamo_edu_double():
                              repeatdelay=100,
                              repeatinterval=100,
                              relief = 'solid',
-                             height = 16, width = 18,
+                             height = 22, width = 19,
                              background = 'tan1')
     button4.bind("<Button-1>", simple_h1)
     button4.grid(row = 0, column = 3)
@@ -1471,7 +1194,7 @@ def jamo_edu_double():
                              repeatdelay=100,
                              repeatinterval=100,
                              relief = 'solid',
-                             height = 16, width = 18,
+                             height = 22, width = 19,
                              background = 'burlywood1')
     button5.bind("<Button-1>", simple_h2)
     button5.grid(row = 0, column = 4)
@@ -1479,17 +1202,16 @@ def jamo_edu_double():
     #뒤로가기 버튼
     
     frame_sel_exit = tkinter.Frame(Jamo, background = "tan")
-    frame_sel_exit.pack(side = "bottom", anchor = 'c',padx = 10, pady = 3)
+    frame_sel_exit.pack(side = "bottom", anchor = 'c')
     button5 = tkinter.Button(frame_sel_exit, text="뒤로가기",command = Close_double,
                              repeatdelay=100,
                              repeatinterval=100,
                              relief = 'solid',
-                             height = 3, width = 20,
+                             height = 3, width = 120,
                              background = 'tan3')
     button5.bind("<Button-1>", Close)
     button5.pack();
     
-    #voice_timmer("demo","데모",5)
 
 def Regist_word(event):
     global long_click_flag
@@ -1537,7 +1259,8 @@ def Regist_word_double():
                     os.system(mp3_route+"단어저장중.mp3")
                     f=open(Manual_route_data+data_ko+'.txt','w')
                     f.write(str(length)+'\n')
-                    for _ in data:
+                    print(data)
+                    for _ in dc.convert_dot(data):
                         f.write(str(_))
                     f.close()
                     tts = gTTS(text=data_ko, lang='ko')
@@ -1585,7 +1308,7 @@ def Regist_word_double():
                                         dot_data.append(b)
             if(cnt>72):
                 os.system(mp3_route+"음성입력제한.mp3")
-                print(cnt)
+                print(cnt, '<- 점자수')
 
             else:
                 print("text: "+ string)
@@ -1634,7 +1357,7 @@ def exit_double():
         return
     voice_timmer("Exit_true","사용을종료합니다",3)
     window.destroy()
-    #clear_all(kit_list)
+    srv.clear_all(kit_list)
     long_click_flag = time.time()
     #motor 다 내리기
     #os.~~~ exit
@@ -1669,7 +1392,7 @@ def quiz_double():
             return
         long_click_flag = time.time()
         voice_timmer("Move","이동완료",1)
-        #초기화
+        srv.clear_all(kit_list)
         Quiz.destroy()
     Quiz.bind("<F11>", Close_double)
 
@@ -1702,7 +1425,7 @@ def quiz_double():
             d_list.append(int(i))
         [d_list.append(0) for i in range(72-len(d_list))]
         print(d_list)
-        print("점자 출력하는 부분")
+        srv.active(d_list,kit_list)
         return r_k_data.replace('.txt',''), d_list, q_v_route
 
     now_data_k, now_data_b, now_voice_route = make_quize()
@@ -1719,12 +1442,14 @@ def quiz_double():
         long_click_flag = time.time()
         voice_timmer("Quiz_re","문제갱신",2)
         now_data_k, now_data_b, now_voice_route = make_quize()
+        button_answer.configure(text="정답 말하기\n(%s)"%now_data_k)
 
 
     def answer(event):
         global long_click_flag
         long_click_flag = time.time()
         voice_timmer("Quiz_a","정답말하기",3)
+        
     
     def answer_double():
         global long_click_flag, now_data_k, now_data_b, now_voice_route
@@ -1741,9 +1466,10 @@ def quiz_double():
         try:
             string = r.recognize_google(audio,language='ko_KO')
             print(string.replace(' ',''),now_data_k.replace(' ',''))
-            if string.replace(' ','') == now_data_k.replace(' ',''):
+            if now_data_k.replace(' ','') in string.replace(' ',''):
                 os.system(mp3_route+"문제정답.mp3")
                 now_data_k, now_data_b, now_voice_route = make_quize()
+                button_answer.configure(text="정답 말하기\n(%s)"%now_data_k)
             else:
                 os.system(mp3_route+"문제오답.mp3")
         
@@ -1773,23 +1499,24 @@ def quiz_double():
                              repeatdelay=100,
                              repeatinterval=100,
                              relief = 'solid',
-                             height = 25, width = 25,
-                             background = 'tan1')
+                             height = 13, width = 53,
+                             background = 'burlywood1')
     button_back.bind("<Button-1>", Close)
 
-    button_answer = tkinter.Button(frame_sel_exit, text="정답 말하기",command = answer_double,
+    button_answer = tkinter.Button(frame_sel_exit, text="정답 말하기\n(%s)"%now_data_k,command = answer_double,
                              repeatdelay=100,
                              repeatinterval=100,
                              relief = 'solid',
-                             height = 25, width = 25,
-                             background = 'burlywood1')
+                             height = 13, width = 53,
+                             background = 'tan1')
     button_answer.bind("<Button-1>", answer)
+    
 
     button_confirm = tkinter.Button(frame_sel_exit, text="정답 확인",command = confirm_double,
                              repeatdelay=100,
                              repeatinterval=100,
                              relief = 'solid',
-                             height = 25, width = 25,
+                             height = 13, width = 53,
                              background = 'tan1')
     button_confirm.bind("<Button-1>", confirm)
 
@@ -1797,31 +1524,63 @@ def quiz_double():
                              repeatdelay=100,
                              repeatinterval=100,
                              relief = 'solid',
-                             height = 25, width = 25,
+                             height = 13, width = 53,
                              background = 'burlywood1')
     button_next_q.bind("<Button-1>", next_q)
     
-    button_back.pack(side='left');
-    button_next_q.pack(side='right');
-    button_confirm.pack(side='right');
-    button_answer.pack(side='right');
+    button_back.grid(row=1,column=0);
+    button_next_q.grid(row=0,column=1);
+    button_confirm.grid(row=1,column=1);
+    button_answer.grid(row=0,column=0);
+
+def Update(event):
+    global long_click_flag
+    long_click_flag = time.time()  
+    voice_timmer("Update","업데이트",3)
+
+def Update_double():
+    global long_click_flag,word_food_list,word_food_len,word_location_list,word_location_len\
+           ,word_trf_list,word_trf_len,d_list,v_list
+    if(time.time() - long_click_flag < 2):
+        return
+    voice_timmer("Move","업데이트시작",4) 
+    long_click_flag = time.time()
+    time.sleep(1)
+    try:
+        signal = dm.down_func(d_list,v_list,version_dir)
+        if signal == 'complete':
+            word_food_list = Smart_File.Find_dir_format(Food_root_data,".txt")
+            word_food_len = len(word_food_list)
+
+            word_location_list = Smart_File.Find_dir_format(Location_root_data,".txt")
+            word_location_len = len(word_location_list)
+
+            word_trf_list = Smart_File.Find_dir_format(Traffic_route_data,".txt")
+            word_trf_len = len(word_trf_list)
+
+            d_list=[Food_root_data, Location_root_data, Traffic_route_data]
+            v_list=[Food_root_voice, Location_root_voice, Traffic_route_voice]
+            os.system(mp3_route+"업데이트완료.mp3")
+        else:
+            os.system(mp3_route+"최신버전.mp3")
+    
+    except:
+        voice_timmer("warning","서버경고",7)
     
 
 if __name__ == '__main__':
-    global window
+    global window, font_1
     #os.system("python3 ~/dip/logo.py")
     
     window=tkinter.Tk()
     window.title("Graduation Project")
     window.geometry("800x480")
 
-
-    window.configure(background='gray60', cursor='none')
+    
+    window.configure(background='#222b3f', cursor='none')
     window.attributes("-fullscreen", True)
 
-
-
-    
+    font_1=tkinter.font.Font(family="맑은 고딕", size=9,weight='bold')
  
     #window.configure(background='tan')    
     #최초 실행시 모터 초기화 및 각도세팅
@@ -1834,67 +1593,69 @@ if __name__ == '__main__':
         return "break"    
     window.bind("<F11>", toggle_fullscreen)
 
-    frame1=tkinter.Frame(window,background="gray60")
-    button1 = tkinter.Button(frame1, text="와이파이 연결",command = Connect_wifi_double,
-                             repeatdelay=100,
-                             repeatinterval=100,
-                             height = 12, width = 22,
-                             relief = 'solid',
-                             background = 'thistle4')
+    frame1=tkinter.Frame(window,background="#222b3f")
+    button1 = tkinter.Button(frame1, text="설정",command = Connect_wifi_double,
+                             repeatdelay=100, highlightbackground = '#c8a780',
+                             repeatinterval=100, fg = '#c8a780', highlightthickness=1,
+                             height = 13, width = 25, highlightcolor='#222b3f',activebackground='#222b3f',
+                             relief = 'solid',activeforeground='#c8a780',font = font_1,
+                             background = '#222b3f')
+    
     button1.bind("<Button-1>", Connect_wifi)
-    button2 = tkinter.Button(frame1, text="단어 학습", command = Word_education_double,
-                             repeatdelay=100,
-                             repeatinterval=100,
-                             height = 12, width = 22,
-                             relief = 'solid',
-                             background = "thistle3")
-
+    button2 = tkinter.Button(frame1, text="단어 학습",command = Word_education_double,
+                             repeatdelay=100, highlightbackground = '#c8a780',
+                             repeatinterval=100, fg = '#222b3f', highlightthickness=1,
+                             height = 13, width = 24, highlightcolor='#222b3f',activebackground='#ffffff',
+                             relief = 'solid',activeforeground='#222b3f',font = font_1,
+                             background = '#ffffff')
     button2.bind("<Button-1>", Word_education)
 
     button3 = tkinter.Button(frame1, text="자음,모음 및 약자 학습", command = jamo_edu_double,
-                             repeatdelay=100,
-                             repeatinterval=100,
-                             height = 12, width = 22,
-                             relief = 'solid',
-                             background = 'thistle4')
+                             repeatdelay=100, highlightbackground = '#c8a780',
+                             repeatinterval=100, fg = '#c8a780', highlightthickness=1,
+                             height = 13, width = 24, highlightcolor='#222b3f',activebackground='#222b3f',
+                             relief = 'solid',activeforeground='#c8a780',font = font_1,
+                             background = '#222b3f')
     button3.bind("<Button-1>", jamo_edu)
     
-    button4 = tkinter.Button(frame1, text="업데이트",bg = 'thistle3',
-                             command = Update,
-                             relief = 'solid', height = 12, width = 22)
-    button4.bind("<Double-Button-1>", Update_double)
+    button4 = tkinter.Button(frame1, text="업데이트", command = Update_double,
+                             repeatdelay=100, highlightbackground = '#c8a780',
+                             repeatinterval=100, fg = '#222b3f', highlightthickness=1,
+                             height = 13, width = 25, highlightcolor='#222b3f',activebackground='#ffffff',
+                             relief = 'solid',activeforeground='#222b3f',font = font_1,
+                             background = '#ffffff')
+    button4.bind("<Button-1>", Update)
     
     button5 = tkinter.Button(frame1, text="수동 모드", command = Free_study_double,
-                             repeatdelay=100,
-                             repeatinterval=100,
-                             height = 12, width = 22,
-                             relief = 'solid',
-                             background = "thistle4")
+                             repeatdelay=100, highlightbackground = '#c8a780',
+                             repeatinterval=100, fg = '#c8a780', highlightthickness=1,
+                             height = 13, width = 24, highlightcolor='#222b3f',activebackground='#222b3f',
+                             relief = 'solid',activeforeground='#c8a780',font = font_1,
+                             background = '#222b3f')
     button5.bind("<Button-1>", Free_study)
     
     button6 = tkinter.Button(frame1, text="단어 등록",command = Regist_word_double,
-                             repeatdelay=100,
-                             repeatinterval=100,
-                             height = 12, width = 22,
-                             relief = 'solid',
-                             background = 'thistle3')
+                             repeatdelay=100, highlightbackground = '#c8a780',
+                             repeatinterval=100, fg = '#222b3f', highlightthickness=1,
+                             height = 13, width = 24, highlightcolor='#222b3f',activebackground='#ffffff',
+                             relief = 'solid',activeforeground='#222b3f',font = font_1,
+                             background = '#ffffff')
     button6.bind("<Button-1>", Regist_word)
     
     button7 = tkinter.Button(frame1, text="사용 종료", command = exit_double,
-                             repeatdelay=100,
-                             repeatinterval=100,
-                             height = 12, width = 22,
-                             relief = 'solid',
-                             background = "thistle3")
-
+                             repeatdelay=100, highlightbackground = '#c8a780',
+                             repeatinterval=100, fg = '#c8a780', highlightthickness=1,
+                             height = 13, width = 25, highlightcolor='#222b3f',activebackground='#222b3f',
+                             relief = 'solid',activeforeground='#c8a780',font = font_1,
+                             background = '#222b3f')
     button7.bind("<Button-1>", exit_)
-
+    
     button8 = tkinter.Button(frame1, text="문제풀기", command = quiz_double,
-                             repeatdelay=100,
-                             repeatinterval=100,
-                             height = 12, width = 22,
-                             relief = 'solid',
-                             background = "thistle4")
+                             repeatdelay=100, highlightbackground = '#c8a780',
+                             repeatinterval=100, fg = '#222b3f', highlightthickness=1,
+                             height = 13, width = 25, highlightcolor='#222b3f',activebackground='#ffffff',
+                             relief = 'solid',activeforeground='#222b3f',font = font_1,
+                             background = '#ffffff')
 
     button8.bind("<Button-1>", quiz)
 
@@ -1906,8 +1667,8 @@ if __name__ == '__main__':
     button5.grid(row = 1, column = 1)
     button6.grid(row = 1, column = 2)
 
-    button7.grid(row = 0, column = 3)
-    button8.grid(row = 1, column = 3)
+    button8.grid(row = 0, column = 3)
+    button7.grid(row = 1, column = 3)
      #왼쪽 마우스 버튼 바인딩
     frame1.pack(expand=True);
     window.mainloop()
