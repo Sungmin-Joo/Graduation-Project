@@ -124,7 +124,7 @@ def word_sheet(root_data,root_sound,word_list,word_len,parent):
     word_index = 0
 
     def Map_wrd(x):
-        voice_timmer_root(root_sound,x[0],x[0],2)
+        voice_timer_root(root_sound,x[0],x[0],2)
         data = Smart_File.Read_file(root_data,word_list[x[1]]).split('\n')
         #디버깅을 위한 출력
         #print("-----------------------------------------------")
