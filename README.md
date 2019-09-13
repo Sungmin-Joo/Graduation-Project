@@ -90,7 +90,7 @@ The following code implements touch (jesture) for the blind.
   
 ## o Videos and Pictures
 
-You can see it by visiting the demo folder.
+You can see it by visiting the [demo](https://github.com/Sungmin-Joo/Graduation-Project/tree/master/demo) folder.
 
 
 ## o S/W development process:  
@@ -104,7 +104,14 @@ You can see it by visiting the demo folder.
         - Voice Recognition -> Braille Transformation  
         - Deploying a Download Server  
         - UI Designing for Visually Impaired  
-        - Overall software design	  
+        - Overall software design  
+    E-mail : 
+        big-joo_dev@naver.com   
+    Phone   :  
+        010-2770-4367  
+    Univesity :  
+        Korea Polytechnic University  
+  
         
 ## o Built With
 
