@@ -1,6 +1,7 @@
-# Edu_dot - Graduation_Project
+# Edu_Dot - Graduation_Project  
+Edu.Dot//201903~  
 
-## About Edu.dot - Braille Board for the Blind  
+## About Edu.Dot - Braille Board for the Blind  
 ![1](https://user-images.githubusercontent.com/46941349/63397239-e99ffb80-c404-11e9-819f-b4874defdf30.PNG)  
 ![2](https://user-images.githubusercontent.com/46941349/63397240-ead12880-c404-11e9-965c-66fd3942bbd2.PNG)  
 
@@ -18,8 +19,8 @@ The "development process" folder contains the development process of the main so
 The "demo" folder contains videos and pictures that actually work
 
 ## o Awards and Honors
-* 2019 창의적 사업계획서 경진대회 - 우수상
-
+* 2019 창의적 사업계획서 경진대회 - 우수상  
+* 2019 산학협동 산업기술대전      - 산업부 장관상  
 
 * [Link](https://github.com/Sungmin-Joo/Graduation_Project/tree/master/Awards_and_Honors)
 
@@ -94,7 +95,9 @@ You can see it by visiting the [demo](https://github.com/Sungmin-Joo/Graduation-
 
 
 ## o S/W development process:  
- * 08/21/2019 : Complete all planned functions  
+ * 06/05/2019 : Complete GUI design and gesture  
+ * 07/17/2019 : Complete first planned Edu.Dot
+ * 08/21/2019 : Complete recognize korean and convert braille, quize  
  
  
  
