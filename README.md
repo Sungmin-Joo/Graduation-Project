@@ -2,8 +2,8 @@
 Edu.Dot//201903~  
 
 ## o About Edu.Dot - Braille Board for the Blind  
-![1](https://user-images.githubusercontent.com/46941349/63397239-e99ffb80-c404-11e9-819f-b4874defdf30.PNG)  
-![2](https://user-images.githubusercontent.com/46941349/63397240-ead12880-c404-11e9-965c-66fd3942bbd2.PNG)  
+![앞](https://user-images.githubusercontent.com/46941349/66121952-697ecf80-e619-11e9-8e81-43db89196b4a.JPG)  
+![뒤JPG](https://user-images.githubusercontent.com/46941349/66121965-73083780-e619-11e9-938d-66d0bbe28431.JPG)  
 
 
 ## o Getting Started
