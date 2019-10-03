@@ -31,9 +31,9 @@ Development Environment :
 
 
     server :  
-        Window 10 + flask     
+        Window 10 + flask in Python     
     client :  
-        Raspberry Pi  
+        Raspberry Pi with Python  
         
         
 
