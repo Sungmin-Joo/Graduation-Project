@@ -22,7 +22,7 @@ The "demo" folder contains videos and pictures that actually work
 * 2019 창의적 사업계획서 경진대회       - 우수상  
 * 2019 산학협동 산업기술대전      - 산업장관상  
 * 2019 임베디드 경진대회        - 우수상  
-* 2019 산학협동 성과발표회      - 상  
+* 2019 산학협동 성과발표회      - 대상  
 
 * [Link](https://github.com/Sungmin-Joo/Graduation_Project/tree/master/Awards_and_Honors)
 
