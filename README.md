@@ -13,10 +13,10 @@ To run main code without hardware, I2C-related functions of the main code shall 
 
 
 This is the software source code for edu_dot team (the graduation project) of the Korea Polytechnic University.  
-The "dip" folder is located under "/home/pi/" in "Raspberry Pi".  
-The "Eud.dot_first_confirm" folder contains some of the code that was first reviewed.(I thought it was a memory.)  
-The "development process" folder contains the development process of the main source code.  
-The "demo" folder contains videos and pictures that actually work
+The "dip" dir is located under "/home/pi/" in "Raspberry Pi".  
+The "Eud.dot_first_confirm" dir contains some of the code that was first reviewed.(I thought it was a memory.)  
+The "development process" dir contains the development process of the main source code.  
+The "demo" dir contains videos and pictures that actually work
 
 ## o Awards and Honors
 * 2019 창의적 사업계획서 경진대회       - 우수상  
